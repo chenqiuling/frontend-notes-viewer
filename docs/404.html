@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>我的前端笔记</title>
+    <!-- 此文件用于处理路由为browser模式下刷新github跳转404问题，但暂未实现成功，故路由已改换hash模式 -->
+    <script type="text/javascript">
+        function find(str, query, index) {
+            var x = str.indexOf(query);
+            for (var i = 0; i < index; i++) {
+                x = str.indexOf(query, x + 1);
+            }
+            return x;
+        }
+
+        var rootPathname = location.pathname.substring(0, find(location.pathname, '/', 1))
+        location.replace(location.protocol + "//" + location.host + rootPathname + '?pathname=' + location.pathname)
+        // location.replace(location.origin + decodeURIComponent(location.search).replace('?pathname=', ''))
+    </script>
+</head>
+<body>
+</body>
+</html>
