@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndexedDB 视频文件存储</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56e4;
+            --secondary: #06d6a0;
+            --warning: #ffd166;
+            --danger: #ef476f;
+            --dark: #1e1e2c;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--primary);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-success {
+            background: var(--secondary);
+        }
+        
+        .btn-success:hover {
+            background: #05b58b;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: #333;
+        }
+        
+        .btn-warning:hover {
+            background: #ffc44d;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background: #e0355f;
+        }
+        
+        .btn-block {
+            display: flex;
+            width: 100%;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #output {
+            background: var(--light-gray);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+            border: 1px solid #dee2e6;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status.success {
+            background: rgba(6, 214, 160, 0.15);
+            border: 1px solid var(--secondary);
+            color: #038a65;
+        }
+        
+        .status.error {
+            background: rgba(239, 71, 111, 0.15);
+            border: 1px solid var(--danger);
+            color: #b71540;
+        }
+        
+        .status.warning {
+            background: rgba(255, 209, 102, 0.15);
+            border: 1px solid var(--warning);
+            color: #b37e00;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: var(--light-gray);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            background: var(--light-gray);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .file-info div {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .file-info strong {
+            color: var(--primary);
+            font-size: 16px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .highlight {
+            background-color: rgba(255, 209, 102, 0.3);
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        
+        .storage-info {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            margin-top: 20px;
+        }
+        
+        .storage-info h3 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .storage-meter {
+            height: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .storage-used {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border-radius: 10px;
+        }
+        
+        .storage-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .note-box {
+            background: rgba(255, 255, 255, 0.9);
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin-top: 20px;
+        }
+        
+        .note-box h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-video"></i> IndexedDB 视频文件存储</h1>
+            <p>演示如何通过URL加载视频文件，存储到IndexedDB中，并处理存储限制</p>
+        </header>
+        
+        <div class="grid">
+            <div class="card">
+                <h2><i class="fas fa-cloud-download-alt"></i> 加载并存储视频</h2>
+                
+                <div class="form-group">
+                    <label for="videoUrl"><i class="fas fa-link"></i> 视频URL</label>
+                    <input type="text" id="videoUrl" placeholder="输入视频URL" value="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4">
+                    <p class="note-box">
+                        <h4><i class="fas fa-lightbulb"></i> 提示</h4>
+                        可以使用以下测试视频URL：<br>
+                        <span class="highlight">https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4</span><br>
+                        <span class="highlight">https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_2mb.mp4</span>
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="videoName"><i class="fas fa-file-video"></i> 视频名称</label>
+                    <input type="text" id="videoName" placeholder="输入视频名称" value="示例视频">
+                </div>
+                
+                <div class="btn-group">
+                    <button id="loadBtn" class="btn btn-success"><i class="fas fa-download"></i> 加载并存储视频</button>
+                    <button id="updateBtn" class="btn btn-warning"><i class="fas fa-sync-alt"></i> 更新视频</button>
+                </div>
+                
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </div>
+                
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <div>
+                        <span>文件大小:</span>
+                        <strong id="fileSize">0 MB</strong>
+                    </div>
+                    <div>
+                        <span>文件类型:</span>
+                        <strong id="fileType">video/mp4</strong>
+                    </div>
+                    <div>
+                        <span>下载进度:</span>
+                        <strong id="downloadPercent">0%</strong>
+                    </div>
+                </div>
+                
+                <div id="loadStatus" class="status"></div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-database"></i> 数据库操作</h2>
+                
+                <div class="form-group">
+                    <label for="dbName"><i class="fas fa-database"></i> 数据库名称</label>
+                    <input type="text" id="dbName" value="VideoDB" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dbStatus"><i class="fas fa-info-circle"></i> 数据库状态</label>
+                    <input type="text" id="dbStatus" value="未初始化" readonly>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="initDbBtn" class="btn"><i class="fas fa-cog"></i> 初始化数据库</button>
+                    <button id="listBtn" class="btn"><i class="fas fa-list"></i> 列出所有视频</button>
+                    <button id="clearBtn" class="btn btn-danger"><i class="fas fa-trash"></i> 清除数据库</button>
+                </div>
+                
+                <div id="dbInfo" class="status"></div>
+                
+                <div class="note-box">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 存储限制信息</h4>
+                    <p>IndexedDB 存储大小限制因浏览器而异：</p>
+                    <ul>
+                        <li>Chrome: 可用空间的80%，但至少为250MB，最多为可用空间的50%</li>
+                        <li>Firefox: 无硬性限制，但会提示用户请求更多空间</li>
+                        <li>Safari: 约1GB</li>
+                        <li>移动浏览器: 通常限制为50MB</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-film"></i> 视频预览</h2>
+            
+            <div class="video-container">
+                <video id="videoPlayer" controls>
+                    <source id="videoSource" src="" type="video/mp4">
+                    您的浏览器不支持HTML5视频播放
+                </video>
+            </div>
+            
+            <div class="file-info" id="videoInfo" style="display: none;">
+                <div>
+                    <span>视频名称:</span>
+                    <strong id="videoNameDisplay">未命名</strong>
+                </div>
+                <div>
+                    <span>存储ID:</span>
+                    <strong id="videoId">-</strong>
+                </div>
+                <div>
+                    <span>存储大小:</span>
+                    <strong id="videoSize">0 MB</strong>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-chart-pie"></i> 存储空间信息</h2>
+            
+            <div class="storage-info">
+                <h3><i class="fas fa-hdd"></i> 浏览器存储状态</h3>
+                <div class="storage-meter">
+                    <div class="storage-used" id="storageUsedBar" style="width: 0%"></div>
+                </div>
+                <div class="storage-stats">
+                    <div>已用: <span id="storageUsed">0 MB</span></div>
+                    <div>可用: <span id="storageAvailable">0 MB</span></div>
+                    <div>总计: <span id="storageTotal">0 MB</span></div>
+                </div>
+            </div>
+            
+            <div id="storageStatus" class="status warning">
+                <i class="fas fa-info-circle"></i>
+                <span>IndexedDB存储空间取决于浏览器和可用磁盘空间。大文件存储可能受限。</span>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-terminal"></i> 操作日志</h2>
+            <div id="output"></div>
+        </div>
+        
+        <footer>
+            <p>IndexedDB 视频存储示例 | 注意：大文件存储可能受浏览器限制</p>
+        </footer>
+    </div>
+
+    <script>
+        // 全局变量
+        let db = null;
+        const dbName = "VideoDB";
+        const storeName = "videos";
+        let currentVideoId = null;
+        
+        // DOM 元素
+        const initDbBtn = document.getElementById('initDbBtn');
+        const loadBtn = document.getElementById('loadBtn');
+        const updateBtn = document.getElementById('updateBtn');
+        const listBtn = document.getElementById('listBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const videoSource = document.getElementById('videoSource');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const fileInfo = document.getElementById('fileInfo');
+        const loadStatus = document.getElementById('loadStatus');
+        const dbInfo = document.getElementById('dbInfo');
+        const output = document.getElementById('output');
+        const dbStatusInput = document.getElementById('dbStatus');
+        const storageUsedBar = document.getElementById('storageUsedBar');
+        
+        // 初始化数据库
+        function initDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(dbName, 1);
+                
+                request.onerror = (event) => {
+                    const error = `数据库打开失败: ${event.target.error}`;
+                    log(error, true);
+                    showStatus(dbInfo, error, false);
+                    reject(error);
+                };
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    dbStatusInput.value = "已连接";
+                    log(`数据库 ${dbName} 打开成功`);
+                    showStatus(dbInfo, "数据库初始化成功", true);
+                    
+                    // 更新存储空间信息
+                    updateStorageInfo();
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    
+                    // 创建对象存储
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        const store = db.createObjectStore(storeName, {
+                            keyPath: "id",
+                            autoIncrement: true
+                        });
+                        
+                        // 创建索引
+                        store.createIndex("nameIndex", "name", { unique: false });
+                        store.createIndex("sizeIndex", "size", { unique: false });
+                        
+                        log(`对象存储 ${storeName} 创建成功`);
+                    }
+                };
+            });
+        }
+        
+        // 从URL加载视频并存储到IndexedDB
+        async function loadAndStoreVideo() {
+            const videoUrl = document.getElementById('videoUrl').value.trim();
+            const videoName = document.getElementById('videoName').value.trim();
+            
+            if (!videoUrl) {
+                showStatus(loadStatus, "请输入视频URL", false);
+                return;
+            }
+            
+            if (!videoName) {
+                showStatus(loadStatus, "请输入视频名称", false);
+                return;
+            }
+            
+            try {
+                showStatus(loadStatus, "开始下载视频...");
+                progressContainer.style.display = "block";
+                fileInfo.style.display = "flex";
+                
+                // 获取视频Blob
+                const { blob, size, type } = await fetchVideoWithProgress(videoUrl);
+                
+                // 存储到IndexedDB
+                const videoData = {
+                    name: videoName,
+                    url: videoUrl,
+                    blob: blob,
+                    size: size,
+                    type: type,
+                    timestamp: new Date()
+                };
+                
+                const id = await storeVideoInDB(videoData);
+                currentVideoId = id;
+                
+                // 显示视频信息
+                document.getElementById('videoNameDisplay').textContent = videoName;
+                document.getElementById('videoId').textContent = id;
+                document.getElementById('videoSize').textContent = formatFileSize(size);
+                document.getElementById('videoInfo').style.display = "flex";
+                
+                // 播放视频
+                playVideoFromBlob(blob, type);
+                
+                // 更新存储信息
+                updateStorageInfo();
+                
+                const success = `视频 "${videoName}" 存储成功 (ID: ${id})`;
+                showStatus(loadStatus, success, true);
+                log(success);
+                
+            } catch (error) {
+                const errorMsg = `加载或存储视频失败: ${error.message}`;
+                showStatus(loadStatus, errorMsg, false);
+                log(errorMsg, true);
+            }
+        }
+        
+        // 更新视频
+        async function updateVideo() {
+            if (!currentVideoId) {
+                showStatus(loadStatus, "请先加载一个视频", false);
+                return;
+            }
+            
+            const videoUrl = document.getElementById('videoUrl').value.trim();
+            const videoName = document.getElementById('videoName').value.trim();
+            
+            if (!videoUrl) {
+                showStatus(loadStatus, "请输入视频URL", false);
+                return;
+            }
+            
+            try {
+                showStatus(loadStatus, "开始更新视频...");
+                progressContainer.style.display = "block";
+                fileInfo.style.display = "flex";
+                
+                // 获取新视频Blob
+                const { blob, size, type } = await fetchVideoWithProgress(videoUrl);
+                
+                // 更新到IndexedDB
+                const videoData = {
+                    id: currentVideoId,
+                    name: videoName,
+                    url: videoUrl,
+                    blob: blob,
+                    size: size,
+                    type: type,
+                    timestamp: new Date()
+                };
+                
+                await updateVideoInDB(videoData);
+                
+                // 显示视频信息
+                document.getElementById('videoNameDisplay').textContent = videoName;
+                document.getElementById('videoSize').textContent = formatFileSize(size);
+                
+                // 播放新视频
+                playVideoFromBlob(blob, type);
+                
+                // 更新存储信息
+                updateStorageInfo();
+                
+                const success = `视频更新成功 (ID: ${currentVideoId})`;
+                showStatus(loadStatus, success, true);
+                log(success);
+                
+            } catch (error) {
+                const errorMsg = `更新视频失败: ${error.message}`;
+                showStatus(loadStatus, errorMsg, false);
+                log(errorMsg, true);
+            }
+        }
+        
+        // 带进度条的视频下载
+        async function fetchVideoWithProgress(url) {
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`下载失败: ${response.status} ${response.statusText}`);
+            }
+            
+            const contentLength = response.headers.get('Content-Length');
+            const totalBytes = parseInt(contentLength || "0", 10);
+            
+            let loadedBytes = 0;
+            const chunks = [];
+            const reader = response.body.getReader();
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                
+                if (done) break;
+                
+                chunks.push(value);
+                loadedBytes += value.length;
+                
+                // 更新进度条
+                const percent = totalBytes ? Math.round((loadedBytes / totalBytes) * 100) : 0;
+                progressBar.style.width = `${percent}%`;
+                document.getElementById('downloadPercent').textContent = `${percent}%`;
+                
+                // 更新文件信息
+                document.getElementById('fileSize').textContent = formatFileSize(totalBytes);
+                document.getElementById('fileType').textContent = response.headers.get('Content-Type') || '未知';
+            }
+            
+            const blob = new Blob(chunks);
+            return {
+                blob: blob,
+                size: blob.size,
+                type: blob.type
+            };
+        }
+        
+        // 存储视频到IndexedDB
+        function storeVideoInDB(videoData) {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject(new Error("数据库未初始化"));
+                    return;
+                }
+                
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const request = store.add(videoData);
+                
+                request.onsuccess = (event) => {
+                    resolve(event.target.result);
+                };
+                
+                request.onerror = (event) => {
+                    reject(event.target.error);
+                };
+            });
+        }
+        
+        // 更新IndexedDB中的视频
+        function updateVideoInDB(videoData) {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject(new Error("数据库未初始化"));
+                    return;
+                }
+                
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const request = store.put(videoData);
+                
+                request.onsuccess = () => {
+                    resolve();
+                };
+                
+                request.onerror = (event) => {
+                    reject(event.target.error);
+                };
+            });
+        }
+        
+        // 从Blob播放视频
+        function playVideoFromBlob(blob, type) {
+            const videoURL = URL.createObjectURL(blob);
+            videoSource.src = videoURL;
+            videoSource.type = type;
+            videoPlayer.load();
+            videoPlayer.play().catch(e => {
+                log("自动播放被阻止: " + e.message);
+            });
+        }
+        
+        // 更新存储空间信息
+        async function updateStorageInfo() {
+            if (!navigator.storage || !navigator.storage.estimate) {
+                log("此浏览器不支持存储配额API");
+                return;
+            }
+            
+            try {
+                const estimate = await navigator.storage.estimate();
+                const usedMB = (estimate.usage / (1024 * 1024)).toFixed(2);
+                const quotaMB = (estimate.quota / (1024 * 1024)).toFixed(2);
+                const availableMB = ((estimate.quota - estimate.usage) / (1024 * 1024)).toFixed(2);
+                const percent = Math.min(100, (estimate.usage / estimate.quota) * 100);
+                
+                document.getElementById('storageUsed').textContent = `${usedMB} MB`;
+                document.getElementById('storageTotal').textContent = `${quotaMB} MB`;
+                document.getElementById('storageAvailable').textContent = `${availableMB} MB`;
+                storageUsedBar.style.width = `${percent}%`;
+                
+                log(`存储空间: 已用 ${usedMB}MB / 总计 ${quotaMB}MB (${percent.toFixed(1)}%)`);
+                
+                // 警告信息
+                if (percent > 80) {
+                    const warning = `警告: 存储空间使用已超过80% (${percent.toFixed(1)}%)`;
+                    document.getElementById('storageStatus').className = "status error";
+                    document.getElementById('storageStatus').innerHTML = 
+                        `<i class="fas fa-exclamation-triangle"></i> ${warning}`;
+                    log(warning, true);
+                } else if (percent > 50) {
+                    const warning = `注意: 存储空间使用已超过50% (${percent.toFixed(1)}%)`;
+                    document.getElementById('storageStatus').className = "status warning";
+                    document.getElementById('storageStatus').innerHTML = 
+                        `<i class="fas fa-exclamation-circle"></i> ${warning}`;
+                    log(warning);
+                }
+                
+            } catch (error) {
+                log(`获取存储信息失败: ${error.message}`, true);
+            }
+        }
+        
+        // 辅助函数：格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 日志函数
+        function log(message, isError = false) {
+            const now = new Date();
+            const timestamp = now.toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logEntry.style.color = isError ? '#e74c3c' : '#2c3e50';
+            logEntry.style.marginBottom = '5px';
+            logEntry.style.padding = '5px';
+            logEntry.style.borderLeft = isError ? '3px solid #e74c3c' : '3px solid #2c3e50';
+            output.prepend(logEntry);
+        }
+        
+        // 显示状态消息
+        function showStatus(element, message, isSuccess = true) {
+            element.innerHTML = isSuccess ? 
+                `<i class="fas fa-check-circle"></i> ${message}` : 
+                `<i class="fas fa-exclamation-circle"></i> ${message}`;
+            element.className = isSuccess ? 'status success' : 'status error';
+            element.style.display = 'flex';
+        }
+        
+        // 事件监听器
+        initDbBtn.addEventListener('click', async () => {
+            try {
+                await initDatabase();
+            } catch (error) {
+                console.error(error);
+            }
+        });
+        
+        loadBtn.addEventListener('click', loadAndStoreVideo);
+        updateBtn.addEventListener('click', updateVideo);
+        
+        listBtn.addEventListener('click', async () => {
+            if (!db) {
+                showStatus(dbInfo, "数据库未初始化", false);
+                return;
+            }
+            
+            try {
+                const tx = db.transaction(storeName, 'readonly');
+                const store = tx.objectStore(storeName);
+                const request = store.getAll();
+                
+                const videos = await new Promise((resolve, reject) => {
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = (event) => reject(event.target.error);
+                });
+                
+                if (videos.length === 0) {
+                    showStatus(dbInfo, "数据库中没有视频", true);
+                    log("数据库中没有视频");
+                    return;
+                }
+                
+                log(`找到 ${videos.length} 个视频文件`);
+                videos.forEach(video => {
+                    log(`视频ID: ${video.id}, 名称: ${video.name}, 大小: ${formatFileSize(video.size)}`);
+                });
+                
+                showStatus(dbInfo, `找到 ${videos.length} 个视频文件`, true);
+                
+            } catch (error) {
+                const errorMsg = `获取视频列表失败: ${error.message}`;
+                showStatus(dbInfo, errorMsg, false);
+                log(errorMsg, true);
+            }
+        });
+        
+        clearBtn.addEventListener('click', async () => {
+            if (!db) {
+                showStatus(dbInfo, "数据库未初始化", false);
+                return;
+            }
+            
+            if (!confirm('确定要清除所有视频数据吗？此操作不可撤销！')) {
+                return;
+            }
+            
+            try {
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const request = store.clear();
+                
+                await new Promise((resolve, reject) => {
+                    request.onsuccess = () => resolve();
+                    request.onerror = (event) => reject(event.target.error);
+                });
+                
+                currentVideoId = null;
+                videoSource.src = "";
+                videoPlayer.load();
+                document.getElementById('videoInfo').style.display = "none";
+                
+                const success = "所有视频数据已清除";
+                showStatus(dbInfo, success, true);
+                log(success);
+                
+                // 更新存储信息
+                updateStorageInfo();
+                
+            } catch (error) {
+                const errorMsg = `清除数据失败: ${error.message}`;
+                showStatus(dbInfo, errorMsg, false);
+                log(errorMsg, true);
+            }
+        });
+        
+        // 页面加载时尝试初始化数据库
+        window.addEventListener('load', async () => {
+            log("页面加载完成，点击'初始化数据库'按钮开始");
+            try {
+                await initDatabase();
+            } catch (error) {
+                console.error("初始数据库初始化失败:", error);
+            }
+        });
+    </script>
+</body>
+</html>
