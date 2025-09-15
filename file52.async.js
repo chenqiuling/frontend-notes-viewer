@@ -1,0 +1,36 @@
+"use strict";(self.webpackChunkfrontend_notes=self.webpackChunkfrontend_notes||[]).push([[6634],{12696:function(t,n,e){e.r(n),n.default=`\u9700\u6C42\uFF1A\u591A\u7528\u4E8E\u81EA\u5B9A\u4E49\u5F39\u7A97\u3001\u5BF9\u8BDD\u6846\u7B49\u7684\u63D0\u793A\u6587\u5B57\uFF0C\u9700\u8981\u6839\u636E\u5185\u5BB9\u957F\u5EA6\u5355\u884C\u5C45\u4E2D\uFF0C\u591A\u884C\u5C45\u5DE6\u663E\u793A\u3002
+
+\u539F\u7406\uFF1A\u5229\u7528\u884C\u5185\u5757 inline-block \u7684\u7279\u70B9\uFF1A\u5BF9\u8C61\u81EA\u8EAB\u5448\u5185\u8054\u5BF9\u8C61 inline\uFF0C\u4F46\u662F\u5BF9\u8C61\u7684\u5185\u5BB9\u5448\u5757\u5BF9\u8C61 block\uFF0C\u7ED9\u7236\u7EA7\u8BBE\u7F6E\u6587\u5B57\u5C45\u4E2D\uFF0C\u81EA\u8EAB\u8BBE\u7F6E\u6587\u5B57\u5C45\u5DE6\u3002
+
+\u8865\u5145\uFF1A\u5982\u679C\u5185\u5BB9\u4E2D\u53EF\u80FD\u542B\u957F\u4E32\u4E0D\u542B\u7A7A\u683C\u7684\u6570\u5B57\u6216\u5B57\u6BCD\uFF0C\u53EF\u4EE5\u518D\u52A0\u4E0A word-break: break-all;\uFF08\u65E0\u7A7A\u683C\u592A\u957F\u7684\u5B57\u6BCD\u3001\u6570\u5B57\u4E0D\u4F1A\u81EA\u52A8\u6362\u884C\uFF09\u3002
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>\u5355\u884C\u5C45\u4E2D\uFF0C\u591A\u884C\u5C45\u5DE6</title>
+    <style>
+      div {
+        width: 180px;
+        border: 1px solid #000;
+        text-align: center;
+      }
+
+      p {
+        display: inline-block;
+        text-align: left;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div>
+      <p>\u8FD9\u662F\u5355\u884C\u6587\u5B57</p>
+      <p>\u8FD9\u662F\u591A\u884C\u6587\u5B57\uFF0C\u8FD9\u662F\u591A\u884C\u6587\u5B57</p>
+    </div>
+  </body>
+</html>
+\`\`\`
+`}}]);

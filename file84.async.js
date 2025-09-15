@@ -1,0 +1,122 @@
+"use strict";(self.webpackChunkfrontend_notes=self.webpackChunkfrontend_notes||[]).push([[6904],{62447:function(o,n,e){e.r(n),n.default=`[[toc]] <!-- \u63D2\u4EF6\u4F1A\u81EA\u52A8\u5728\u6B64\u4F4D\u7F6E\u63D2\u5165\u76EE\u5F55 -->
+
+JavaScript \u4E2D\u7684\u4E24\u4E2A\u4E3B\u8981\u6A21\u5757\u7CFB\u7EDF\uFF1A**CommonJS (CJS)** \u548C **ECMAScript Modules (ESM)**\u3002
+
+## \u6838\u5FC3\u533A\u522B
+| \u7279\u6027         | CommonJS (CJS)                 | ECMAScript Modules (ESM)       |
+| ------------ | ------------------------------ | ------------------------------ |
+| **\u8D77\u6E90**     | Node.js \u793E\u533A\u89C4\u8303               | ECMAScript \u8BED\u8A00\u6807\u51C6 (ES6/2015) |
+| **\u8BBE\u8BA1\u76EE\u6807** | \u670D\u52A1\u5668\u7AEF\u6A21\u5757\u5316 (Node.js)       | \u6D4F\u89C8\u5668\u548C\u670D\u52A1\u5668\u7AEF\u7EDF\u4E00\u6A21\u5757\u5316     |
+| **\u52A0\u8F7D\u65F6\u673A** | **\u8FD0\u884C\u65F6\u52A0\u8F7D** (\u540C\u6B65)          | **\u7F16\u8BD1\u65F6\u9759\u6001\u89E3\u6790** (\u5F02\u6B65/\u540C\u6B65) |
+| **\u8BED\u6CD5**     | \`require()\`, \`module.exports\`  | \`import\`, \`export\`             |
+| **\u4F18\u7F3A\u70B9** |  \u652F\u6301\u52A8\u6001\u5BFC\u5165\u8DEF\u5F84\uFF0C\u540C\u6B65\u4F1A\u963B\u585E\u6E32\u67D3\uFF0C\u4E0D\u5229\u4E8E Tree Shaking  |  \u652F\u6301Tree Shaking\uFF0C\u5F02\u6B65\u52A0\u8F7D\u4E0D\u4F1A\u963B\u585E\u6E32\u67D3\uFF0CES2020\u540E\u624D\u652F\u6301\`import()\`\u52A8\u6001\u5BFC\u5165  |
+| **\u5BFC\u51FA\u503C**   | \u503C\u7684**\u62F7\u8D1D** (\u5BFC\u51FA\u57FA\u672C\u7C7B\u578B\u65F6) | \u503C\u7684**\u53EA\u8BFB\u5F15\u7528** (\u5B9E\u65F6\u7ED1\u5B9A)    |
+| **\u9876\u5C42 \`this\`** | \u6307\u5411\u5F53\u524D\u6A21\u5757 (\`module.exports\`) | \`undefined\`                    |
+| **\u5FAA\u73AF\u4F9D\u8D56** | \u652F\u6301\uFF0C\u4F46\u884C\u4E3A\u53EF\u80FD\u590D\u6742           | \u652F\u6301\uFF0C\u8BBE\u8BA1\u4E0A\u66F4\u6E05\u6670             |
+| **\u4E3B\u8981\u73AF\u5883** | Node.js (\u4F20\u7EDF), \u6D4F\u89C8\u5668\u9700\u6253\u5305   | \u73B0\u4EE3\u6D4F\u89C8\u5668\u3001Node.js (\`.mjs\` \u6216 \`"type": "module"\`), \u6253\u5305\u5DE5\u5177 |
+| **\u6587\u4EF6\u6269\u5C55\u540D** | \`.js\`, \`.cjs\`             | \`.js\` (\u914D\u5408 \`package.json\`), \`.mjs\` |
+
+## CommonJS
+\`\`\`js
+// \u5BFC\u5165
+const moduleA = require('./moduleA');
+
+// \u5BFC\u51FA\u5355\u4E2A\u503C
+module.exports = value;
+// \u5BFC\u51FA\u591A\u4E2A\u503C
+exports.name1 = value1; exports.name2 = value2; (\u6216 module.exports = { name1, name2 };)
+\`\`\`
+
+### \u503C\u5F15\u7528\uFF08\u5BFC\u51FA\u57FA\u672C\u7C7B\u578B\u65F6\uFF09
+CommonJS\u5BFC\u51FA\u7684\u662F module.exports \u5BF9\u8C61\u7684\u5F53\u524D\u503C\u7684\u4E00\u4E2A\u62F7\u8D1D\u3002
+
+\u5982\u679C\u5BFC\u51FA\u4E00\u4E2A\u539F\u59CB\u503C\uFF08number, string, boolean\uFF09\uFF0C\u5BFC\u5165\u6A21\u5757\u5F97\u5230\u7684\u662F\u4E00\u4E2A\u72EC\u7ACB\u7684\u526F\u672C\u3002\u4FEE\u6539\u5BFC\u51FA\u6A21\u5757\u4E2D\u7684\u539F\u59CB\u503C\uFF0C\u4E0D\u4F1A\u5F71\u54CD\u5BFC\u5165\u6A21\u5757\u4E2D\u7684\u503C\u3002
+\`\`\`js
+// cjs-module.js
+let count = 0;
+function increment() { count++; }
+module.exports = { count, increment };
+
+// cjs-main.js
+const { count, increment } = require('./cjs-module');
+console.log(count); // 0
+increment();
+console.log(count); // 0 (count \u662F\u62F7\u8D1D\u7684\u503C\uFF0C\u672A\u53D8)
+\`\`\`
+\u5982\u679C\u5BFC\u51FA\u4E00\u4E2A\u5BF9\u8C61\uFF0C\u5BFC\u5165\u6A21\u5757\u5F97\u5230\u7684\u662F\u5BF9\u8BE5\u5BF9\u8C61\u7684\u5F15\u7528\u3002\u4FEE\u6539\u5BF9\u8C61\u7684\u5C5E\u6027\u4F1A\u5F71\u54CD\u6240\u6709\u5BFC\u5165\u6A21\u5757\u3002
+
+### \u8DEF\u5F84\u83B7\u53D6
+CommonJS \u63D0\u4F9B\u4E86 \`__filename\` (\u5F53\u524D\u6A21\u5757\u6587\u4EF6\u7684\u7EDD\u5BF9\u8DEF\u5F84) \u548C \`__dirname\` (\u5F53\u524D\u6A21\u5757\u6587\u4EF6\u6240\u5728\u76EE\u5F55\u7684\u7EDD\u5BF9\u8DEF\u5F84) \u6765\u5B9E\u73B0\u7C7B\u4F3C\u5B9A\u4F4D\u8D44\u6E90\u7684\u529F\u80FD\u3002
+
+## ES Module
+\`\`\`js
+// \u9ED8\u8BA4\u5BFC\u5165
+import moduleA from './moduleA.js';
+// \u547D\u540D\u5BFC\u5165
+import { name1, name2 } from './moduleA.js';
+// \u547D\u540D\u7A7A\u95F4\u5BFC\u5165
+import * as moduleA from './moduleA.js';
+// \u52A8\u6001\u5BFC\u5165\uFF08\u8FD4\u56DE Promise\uFF09
+import('./moduleA.js').then(module => { ... });
+
+// \u9ED8\u8BA4\u5BFC\u51FA\uFF0C\u4E00\u4E2A\u6A21\u5757\u53EA\u80FD\u6709\u4E00\u4E2A
+export default value;
+// \u547D\u540D\u5BFC\u51FA
+export const name1 = value1;
+export function name2() { ... }
+// \u7EC4\u5408\u5BFC\u51FA
+export { name1, name2 };
+\`\`\`
+
+### \u503C\u62F7\u8D1D
+\u5BFC\u51FA\u548C\u5BFC\u5165\u4E4B\u95F4\u5EFA\u7ACB\u7684\u662F\u53EA\u8BFB\u7684\u5B9E\u65F6\u7ED1\u5B9A\u3002
+
+\u5982\u679C\u5BFC\u51FA\u6A21\u5757\u4FEE\u6539\u4E86\u8BE5\u53D8\u91CF\u7684\u503C\uFF0C\u6240\u6709\u5BFC\u5165\u6A21\u5757\u4E2D\u8BFB\u53D6\u5230\u7684\u503C\u90FD\u4F1A\u7ACB\u5373\u66F4\u65B0\u3002
+\`\`\`js
+// esm-module.js
+export let count = 0;
+export function increment() { count++; }
+
+// esm-main.js
+import { count, increment } from './esm-module.js';
+console.log(count); // 0
+increment();
+console.log(count); // 1 (count \u662F\u5B9E\u65F6\u7ED1\u5B9A\uFF0C\u503C\u66F4\u65B0\u4E86)
+// count = 10; // \u9519\u8BEF\uFF01SyntaxError: Assignment to constant variable. (\u4E0D\u80FD\u76F4\u63A5\u4FEE\u6539\u7ED1\u5B9A)
+\`\`\`
+
+### \u73AF\u5883\u652F\u6301
+1. \u6D4F\u89C8\u5668\u4E2D\uFF0C\u901A\u8FC7\u5B9A\u4E49 script \u6807\u7B7E\u7684 type \u5C5E\u6027\uFF0C\u53EF\u4EE5\u76F4\u63A5\u5728 js \u4E2D\u4F7F\u7528 import \u5BFC\u5165\uFF1A
+
+\`\`\`html
+<script type="module" src="xxx"><\/script>
+
+<script type="module">
+  // \u652F\u6301import\u8BED\u6CD5
+  import { XX } from './XXLib.js';
+
+  XX();
+<\/script>
+\`\`\`
+
+\u6CE8\u610F\uFF1A\u5728\u6D4F\u89C8\u5668\u4E2D\uFF0Cimport \u5FC5\u987B\u83B7\u5F97\u4E00\u4E2A\u76F8\u5BF9 URL \u6216\u7EDD\u5BF9 URL\u3002\u6CA1\u6709\u4EFB\u4F55\u8DEF\u5F84\u7684\u6A21\u5757\u79F0\u4E3A\u201C\u88F8\u201D\u6A21\u5757\u3002\u8FD9\u6837\u7684\u6A21\u5757\u662F\u4E0D\u5141\u8BB8\u5BFC\u5165\u7684\u3002
+
+2. Node.js\u4E2D\u4F7F\u7528 .mjs \u6269\u5C55\u540D\u6216\u5728\u6700\u8FD1\u7684 package.json \u4E2D\u8BBE\u7F6E \`"type": "module"\`
+
+### \u8DEF\u5F84\u83B7\u53D6
+ES \u6A21\u5757\u5185\u7F6E\u4E86\u4E00\u4E2A\`import.meta\`\u53EA\u8BFB\u5BF9\u8C61\uFF0C\u8BE5\u5BF9\u8C61\u5305\u542B\u4E86\u6A21\u5757\u7684\u5143\u6570\u636E\u4FE1\u606F\uFF0C\u5982\`import.meta.url\`\u83B7\u53D6\u6A21\u5757\u5728\u6D4F\u89C8\u5668\u548C Node.js \u4E2D\u7684\u7EDD\u5BF9\u8DEF\u5F84\u3002
+
+\u6838\u5FC3\u7528\u9014\u662F\u4F5C\u4E3A\u57FA\u51C6\u8DEF\u5F84\uFF0C\u5B89\u5168\u53EF\u9760\u5730\u89E3\u6790\u76F8\u5BF9\u4E8E\u5F53\u524D\u6A21\u5757\u7684\u5176\u4ED6\u8D44\u6E90\u8DEF\u5F84\uFF08\u4F7F\u7528 \`new URL(relativePath, import.meta.url)\`\uFF09\u3002
+
+\`\`\`js
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url); // \u7B49\u6548\u4E8E CJS \u7684 __filename
+const __dirname = dirname(__filename); // \u7B49\u6548\u4E8E CJS \u7684 __dirname
+\`\`\`
+
+\`\`\`jsx
+<img src={new URL('./logo.png', import.meta.url).href} />
+\`\`\`
+`}}]);

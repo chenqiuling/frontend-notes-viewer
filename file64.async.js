@@ -1,0 +1,955 @@
+"use strict";(self.webpackChunkfrontend_notes=self.webpackChunkfrontend_notes||[]).push([[555],{31140:function(t,n,e){e.r(n),n.default=`[[toc]] <!-- \u63D2\u4EF6\u4F1A\u81EA\u52A8\u5728\u6B64\u4F4D\u7F6E\u63D2\u5165\u76EE\u5F55 -->
+
+[React \u4E2D\u6587\u6587\u6863](https://zh-hans.reactjs.org/)
+
+## \u521B\u5EFA\u9879\u76EE
+
+[create-react-app](https://create-react-app.dev/docs/adding-typescript/)
+
+\`\`\`
+npx create-react-app my-app --template typescript
+\`\`\`
+
+## JSX \u8BED\u6CD5
+
+\`\`\`jsx
+const element = <h1 className="title">Hello, {name}!</h1>;
+// \u7F16\u8BD1\u540E\uFF1A
+React.createElement('h1', { className: 'title' }, 'Hello, ', name, '!');
+\`\`\`
+
+## \u7C7B\u7EC4\u4EF6
+
+### \u7EC4\u4EF6\u5B9A\u4E49
+
+\`\`\`tsx
+interface IProps {}
+interface IState {
+  count: number;
+}
+
+class CompName extends React.Component<IProps, IState> {
+  constructor(props) {
+    super(props);
+    this.state = { count: 0 };
+  }
+
+  render() {
+    return <div>{count}</div>;
+  }
+}
+export default CompName;
+\`\`\`
+
+### Props & State
+
+\u5728 react18 \u4EE5\u524D\uFF0C\u4E00\u822C\u60C5\u51B5\u4E0B setState \u662F\u5F02\u6B65\u7684\uFF0C\u53EA\u6709\u5728\u539F\u751F\u4E8B\u4EF6\u5982 setTimeout\u3001setInterval\u3001addEventListener \u4E2D\u662F\u540C\u6B65\u7684\u3002
+\u5728\u5F02\u6B65\u60C5\u51B5\u4E0B\uFF0C\u8FDB\u884C\u591A\u6B21\u76F8\u540C\u7684 setState\uFF0C\u56E0\u4E3A\u6BCF\u6B21\u83B7\u53D6\u7684 this.state \u90FD\u662F\u64CD\u4F5C\u524D\u7684\u503C\uFF0C\u6240\u4EE5\u5B9E\u9645\u7ED3\u679C\u53EA\u66F4\u65B0\u4E00\u6B21\u3002
+
+\u5728 setState \u51FD\u6570\u4E2D\uFF0C\u6839\u636E isBatchingUpdates \u5224\u65AD\u662F\u76F4\u63A5\u66F4\u65B0 this.state \u8FD8\u662F\u653E\u5165 dirtyComponents \u961F\u5217\u4E2D\uFF1BisBatchingUpdates \u9ED8\u8BA4\u662F false\uFF0Creact \u5728\u8C03\u7528\u5185\u90E8\u4E8B\u4EF6\u5904\u7406\u51FD\u6570\u65F6\uFF0C\u4F1A\u8C03\u7528 batchedUpdates \u51FD\u6570\uFF0C\u628A isBatchingUpdates \u66F4\u65B0\u4E3A true\u3002\u800C\u539F\u751F\u4E8B\u4EF6\u4E0D\u4F1A\u8FDB\u5165 react \u7684\u4E8B\u52A1\u5904\u7406\u4E2D\uFF0C\u6240\u4EE5\u4F1A\u76F4\u63A5\u66F4\u65B0\u3002
+
+\`\`\`js
+export default class CompName extends Component {
+  state = {
+    count: 0,
+  };
+
+  componentDidMount() {
+    // react 16\\17\uFF0C\u6253\u5370\u8F93\u51FA\u4F9D\u6B21\u4E3A\uFF1Alog 0 -> log 0 -> callback 1 -> setTimeout 2 -> setTimeout 3
+    // react 18\uFF0C\u6253\u5370\u8F93\u51FA\u4F9D\u6B21\u4E3A\uFF1Alog 0 -> log 0 -> callback 1 -> setTimeout 1 -> setTimeout 1
+    this.setState({
+      count: this.state.count + 1,
+    });
+    console.log('log', this.state.count); // 0
+
+    this.setState({ count: this.state.count + 1 }, () => {
+      console.log('callback', this.state.count); // 1
+    });
+    console.log('log', this.state.count); // 0
+
+    setTimeout(() => {
+      this.setState({
+        count: this.state.count + 1,
+      });
+      console.log('setTimeout', this.state.count); // 2
+
+      this.setState({
+        count: this.state.count + 1,
+      });
+      console.log('setTimeout', this.state.count); // 3
+    }, 0);
+  }
+
+  render() {
+    return null;
+  }
+}
+\`\`\`
+
+\u89E3\u51B3 setState \u83B7\u53D6\u4E0D\u5230\u6700\u65B0\u503C\u7684\u65B9\u6CD5\uFF1A
+
+\`\`\`jsx
+this.setState((state, props) => ({
+  counter: state.counter + props.increment,
+}));
+\`\`\`
+
+\u56E0\u4E3A this.props \u548C this.state \u53EF\u80FD\u4F1A\u5F02\u6B65\u66F4\u65B0\uFF0C\u6240\u4EE5\u4E0D\u8981\u4F9D\u8D56\u4ED6\u4EEC\u7684\u503C\u6765\u66F4\u65B0\u4E0B\u4E00\u4E2A\u72B6\u6001\u3002
+
+### \u751F\u547D\u5468\u671F
+
+\`\`\`jsx
+// \u521D\u59CB\u5316\uFF0C\u521D\u59CB\u5316state
+constructor(props, context) {}
+
+// \u7EC4\u4EF6\u5C06\u88AB\u6302\u8F7D\uFF08\u5C06\u5E9F\u5F03\uFF09\uFF0C\u6B64\u5468\u671FsetState\u65E0\u610F\u4E49
+componentWillMount() {}
+
+// \u7EC4\u4EF6\u63A5\u6536\u5230\u65B0\u5C5E\u6027\uFF08\u5C06\u5E9F\u5F03\uFF09\uFF0C\u6B64\u5468\u671FsetState\u53EA\u6E32\u67D3\u4E00\u6B21
+componentWillReceiveProps(nextProps, nextContext) {}
+
+// \u7EC4\u4EF6\u662F\u5426\u5E94\u8BE5\u66F4\u65B0 \u9ED8\u8BA4\u8FD4\u56DEtrue\uFF0C\u6B64\u5468\u671F\u4E0D\u80FDsetState\uFF0C\u4F1A\u6B7B\u5FAA\u73AF
+shouldComponentUpdate(nextProps, nextState, nextContext) {
+  return nextState.count !== this.state.count; // \u6027\u80FD\u4F18\u5316
+}
+
+// \u7EC4\u4EF6\u5C06\u66F4\u65B0\uFF08\u5C06\u5E9F\u5F03\uFF09\uFF0C\u6B64\u5468\u671F\u4E0D\u80FDsetState\uFF0C\u4F1A\u6B7B\u5FAA\u73AF
+componentWillUpdate(nextProps, nextState, nextContext) {}
+
+// \u7EC4\u4EF6\u6E32\u67D3
+render() {}
+
+// \u7EC4\u4EF6\u5DF2\u6E32\u67D3\uFF0C\u6B64\u5468\u671FsetState\u6E32\u67D3\u4E24\u6B21
+componentDidMount() {}
+
+// \u9996\u6B21\u6E32\u67D3\u548CshouldComponentUpdate\u8FD4\u56DEfalse\u65F6\u4E0D\u6267\u884C\uFF0C\u6B64\u5468\u671FsetState\u6E32\u67D3\u4E24\u6B21
+componentDidUpdate(prevProps, prevState, snapshot) {}
+
+// \u7EC4\u4EF6\u5C06\u88AB\u79FB\u9664\uFF0C\u6B64\u5468\u671FsetState\u65E0\u6548
+componentWillUnmount() {}
+
+// \u65B0\u589E\u7684\u751F\u547D\u5468\u671F\uFF1A
+static getDerivedStateFromProps(props, state) {} // \u53D6\u7F14 componentWillMount
+getSnapshotBeforeUpdate(prevProps, prevState) {} // \u4F5C\u4E3A componentDidUpdate\u7B2C\u4E09\u4E2A\u53C2\u6570\u503C
+
+static getDerivedStateFromError() {}
+componentDidCatch(error, errorInfo) {}
+\`\`\`
+
+## \u51FD\u6570\u7EC4\u4EF6
+
+### \u7EC4\u4EF6\u5B9A\u4E49
+
+\`\`\`tsx
+interface IProps {}
+
+export const CompName = (props: IProps) => {
+  const [count, setCount] = useState(1);
+
+  useEffect(() => {}, []); // \u4F7F\u7528hooks
+
+  return <div>count is {count}</div>;
+};
+// \u6216
+export const CompName: React.FC<IProps> = props => {};
+\`\`\`
+
+### Props & State
+
+- useState \u603B\u662F\u5F02\u6B65\u7684\u3002\u53EF\u4EE5\u901A\u8FC7 useEffect \u6216\u8005\u4F20\u5165\u51FD\u6570\u83B7\u53D6\u6700\u65B0\u503C\u3002
+- useState \u4E0D\u4F1A\u81EA\u52A8\u5408\u5E76\u66F4\u65B0\u5BF9\u8C61\uFF0C\u53EF\u4EE5\u7528\u51FD\u6570\u5F0F\u7684 setState \u7ED3\u5408\u5C55\u5F00\u8FD0\u7B97\u7B26\u6765\u8FBE\u5230\u5408\u5E76\u66F4\u65B0\u5BF9\u8C61\u7684\u6548\u679C\u3002
+
+\`\`\`jsx
+setCount(s => ({ ...s, ...update }));
+\`\`\`
+
+### Hooks \u6A21\u62DF\u751F\u547D\u5468\u671F
+
+\`\`\`jsx
+import React, { useEffect } from 'react';
+
+// useEffect(callback, [source])\uFF0C\u7B2C\u4E00\u4E2A\u4E3A\u51FD\u6570\uFF0C\u7B2C\u4E8C\u4E2A\u4E3A\u6570\u7EC4\uFF0C\u6570\u7EC4\u4E2D\u53EF\u4EE5\u8868\u793A\u4F9D\u8D56\u53D8\u5316\u7684\u503C
+// useEffect \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4E3A\u7A7A\u6570\u7EC4\u65F6\uFF0C\u7B2C\u4E00\u4E2A\u53C2\u6570\u76F8\u5F53\u4E8EcomponentDidMount
+// useEffect \u7B2C\u4E00\u4E2A\u53C2\u6570return\u4E00\u4E2A\u51FD\u6570\u65F6\uFF0C\u6B64\u51FD\u6570\u76F8\u5F53\u4E8EcomponentWillUnmount
+// useEffect \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4F20\u5165\u503C\u65F6\uFF0C\u503C\u6BCF\u53D8\u5316\u4E00\u6B21\u4F1A\u89E6\u53D1\u4E00\u6B21\u51FD\u6570\uFF0C\u76F8\u5F53\u4E8EcomponentDidUpdate
+
+useEffect(() => {
+  console.log('enter');
+  return () => {
+    console.log('leave');
+  };
+}, []);
+
+useEffect(() => {
+  console.log('count is updated');
+}, [count]);
+\`\`\`
+
+## \u7EC4\u4EF6\u95F4\u901A\u4FE1
+
+### \u7236\u7EC4\u4EF6\u5411\u5B50\u7EC4\u4EF6\u901A\u4FE1
+
+\`\`\`jsx
+const Child = props => {
+  return <div>{props.count}</div>;
+};
+
+const Parent = () => {
+  const [count, setCount] = useState(1);
+
+  return <Child count={count} />;
+};
+
+export default Parent;
+\`\`\`
+
+### \u5B50\u7EC4\u4EF6\u5411\u7236\u7EC4\u4EF6\u901A\u4FE1
+
+\`\`\`jsx
+const Child = props => {
+  const [count, setCount] = useState(1);
+
+  return <div onClick={() => props.getCount(count)}>\u5B50\u7EC4\u4EF6\u8C03\u7528\u7236\u7EC4\u4EF6\u65B9\u6CD5\u4F20\u503C</div>;
+};
+
+const Parent = () => {
+  return <Child getCount={value => console.log('\u83B7\u53D6\u7684\u5B50\u7EC4\u4EF6\u503C\u4E3A', value)} />;
+};
+
+export default Parent;
+\`\`\`
+
+### \u5144\u5F1F\u7EC4\u4EF6\u95F4\u901A\u4FE1
+
+\u4F9D\u8D56\u4E0E\u7236\u7EC4\u4EF6\u8FDB\u884C\u4F20\u9012\uFF0C\u6216\u8005\u76F4\u63A5\u4F7F\u7528 redux\u3001mobx\u3001createModel\uFF08umi \u7684\uFF09\u7B49\u65B9\u6CD5\u5171\u4EAB\u7EC4\u4EF6\u95F4\u72B6\u6001\u3002
+\u5373\u5148\u201C\u7236\u7EC4\u4EF6\u83B7\u53D6\u5B50\u7EC4\u4EF6 1 \u7684\u503C\u201D\uFF0C\u518D\u201C\u7236\u7EC4\u4EF6\u5411\u5B50\u7EC4\u4EF6 2 \u4F20\u503C\u201D
+
+### \u8DE8\u7EA7\u7EC4\u4EF6\u95F4\u901A\u4FE1
+
+\u4F7F\u7528 react \u63D0\u4F9B\u7684 context\uFF0C\u6216\u8005\u76F4\u63A5\u4F7F\u7528 redux\u3001mobx\u3001createModel\uFF08umi \u7684\uFF09\u7B49\u65B9\u6CD5\u5171\u4EAB\u7EC4\u4EF6\u95F4\u72B6\u6001\u3002
+
+\`\`\`jsx
+var Context = React.createContext({
+  count: 0,
+});
+
+const ComA = () => {
+  const [count, setCount] = useState(1);
+
+  return (
+    <div>
+      \u9700\u8981\u4F20\u9012\u7684\u503C
+      <Context.Provider value={{ count }}></Context.Provider>
+    </div>
+  );
+};
+
+const ComB = () => {
+  return (
+    <div>
+      \u83B7\u53D6\u503C
+      <Context.Consumer>{ctx => <div>{ctx.count}</div>}</Context.Consumer>
+    </div>
+  );
+};
+\`\`\`
+
+### \u5168\u5C40\u72B6\u6001\u7BA1\u7406
+
+useReducer\u3001redux\u3001mobx\u3001hox\u3001recoil\uFF08\u5355\u72EC\u6574\u7406\u4E86[\u72B6\u6001\u7BA1\u7406.md](https://chenqiuling.github.io/frontend-notes-viewer/#/doc/66)\uFF09
+
+## Hooks \u539F\u7406
+
+Hooks \u8BBE\u8BA1\u7684\u521D\u8877\u662F\u4E3A\u4E86\u89E3\u51B3\u7C7B\u7EC4\u4EF6\u4E4B\u95F4\u72B6\u6001\u96BE\u4EE5\u590D\u7528\u7684\u95EE\u9898\uFF08\u9700\u8981\u901A\u8FC7\u9AD8\u9636\u7EC4\u4EF6\u3001\u72B6\u6001\u7BA1\u7406\u7B49\uFF09
+
+React \u5185\u90E8\u4F7F\u7528\u94FE\u8868\u7ED3\u6784\u6765\u7BA1\u7406 Hooks\u3002\u6BCF\u4E2A\u7EC4\u4EF6\u5B9E\u4F8B\u90FD\u6709\u4E00\u4E2A\u4E0E\u4E4B\u5173\u8054\u7684 Hooks \u94FE\u8868\uFF0C\u6BCF\u4E2A Hooks \u8C03\u7528\u90FD\u4F1A\u5728\u94FE\u8868\u4E2D\u6DFB\u52A0\u4E00\u4E2A\u8282\u70B9\u3002
+
+\u6838\u5FC3\u673A\u5236\uFF1A
+
+- \u51FD\u6570\u7EC4\u4EF6\u6267\u884C\u65F6\uFF0CHooks \u6309\u8C03\u7528\u987A\u5E8F\u5B58\u50A8\u5728\u201C\u8BB0\u5FC6\u5355\u5143\u683C\u201D\u94FE\u8868\u4E2D
+- \u4F9D\u8D56\u8C03\u7528\u987A\u5E8F\u4FDD\u8BC1\u72B6\u6001\u6B63\u786E\u5BF9\u5E94
+- useState \u4F7F\u7528\u95ED\u5305\u4FDD\u5B58\u72B6\u6001
+- useEffect \u4F9D\u8D56\u6536\u96C6\u548C\u6BD4\u8F83
+
+\u9650\u5236\uFF1A\u4E3A\u4EC0\u4E48 Hooks \u4E0D\u80FD\u5199\u5728\u5FAA\u73AF\u3001\u6761\u4EF6\u6216\u5D4C\u5957\u51FD\u6570\u4E2D\uFF1F
+
+\u56E0\u4E3A React \u9700\u8981\u786E\u4FDD Hooks \u7684\u8C03\u7528\u987A\u5E8F\u5728\u7EC4\u4EF6\u7684\u751F\u547D\u5468\u671F\u4E2D\u4FDD\u6301\u4E00\u81F4\u3002\u8FD9\u662F\u4E3A\u4E86\u6B63\u786E\u5730\u5173\u8054\u72B6\u6001\u53D8\u91CF\u548C\u526F\u4F5C\u7528\uFF0C\u907F\u514D\u4E0D\u53EF\u9884\u6D4B\u7684\u884C\u4E3A\u548C\u6F5C\u5728\u7684 bug
+
+\u5982\u4F55\u89C4\u907F\u9519\u8BEF\u7684\u4F7F\u7528\uFF1A\u53EF\u4EE5\u5728 eslint \u4E2D\u5F15\u5165 eslint-plugin-react-hooks \u68C0\u67E5
+
+## \u5E38\u7528\u5B98\u65B9 Hooks
+
+### useState
+
+\u7528\u4E8E\u7EC4\u4EF6\u72B6\u6001\u7BA1\u7406\uFF0C\u4E0E\u7C7B\u7EC4\u4EF6\u7684 this.setState()\u4F5C\u7528\u7C7B\u4F3C\u3002
+
+\`\`\`js
+function Comp() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    setCount(c => c + 1);
+  }, []);
+
+  return <div>{count}</div>;
+}
+\`\`\`
+
+### useRef
+
+\u8BBF\u95EE DOM \u548C\u6301\u4E45\u5316\u5B58\u50A8
+
+\`\`\`js
+function Comp() {
+  const inputRef = useRef();
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [inputRef.current]);
+
+  return <input ref={inputRef} />;
+}
+\`\`\`
+
+\u6CE8\u610F\uFF1A
+
+- .current \u5728\u9875\u9762\u6302\u8F7D\u65F6\`useEffect(()=>{}, [])\`\u53EF\u80FD\u4E3A null
+- \u66F4\u6539 .current \u5C5E\u6027**\u4E0D\u4F1A**\u89E6\u53D1\u91CD\u65B0\u6E32\u67D3
+
+### useEffect
+
+\u5F02\u6B65\u7684\u526F\u4F5C\u7528\u5904\u7406\u3002useEffect \u4F1A\u5728\u7EC4\u4EF6\u6E32\u67D3\u5230\u5C4F\u5E55\u4E4B\u540E\u6267\u884C\u3002
+
+### useLayoutEffect
+
+\u540C\u6B65\u5E03\u5C40\u526F\u4F5C\u7528\u3002useLayoutEffect \u4F1A\u5728\u6D4F\u89C8\u5668\u4E0B\u4E00\u6B21\u7ED8\u5236\u4E4B\u524D\u6267\u884C\u3002
+
+### useContext
+
+\u4E0A\u4E0B\u6587\u8BBF\u95EE\u3002\u5F53 Context \u503C\u53D8\u5316\u65F6\u7EC4\u4EF6\u91CD\u65B0\u6E32\u67D3\u3002
+
+\`\`\`js
+const ThemeContext = React.createContext('light');
+
+function ThemedButton() {
+  const theme = useContext(ThemeContext);
+
+  return <button className={\`btn-\${theme}\`}>Themed Button</button>;
+}
+\`\`\`
+
+### useReducer
+
+\u7528\u4E8E\u72B6\u6001\u7BA1\u7406\uFF0C\u7C7B\u4F3C redux \u91CC\u7684 reducer\u3002
+
+\`\`\`js
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return { count: state.count + 1 };
+    case 'decrement':
+      return { count: state.count - 1 };
+    default:
+      throw new Error();
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, { count: 0 });
+
+  return (
+    <>
+      Count: {state.count}
+      <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+      <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+    </>
+  );
+}
+\`\`\`
+
+### useMemo
+
+\u8BB0\u5FC6\u503C\u3002\u7F13\u5B58\u8BA1\u7B97\u7ED3\u679C\uFF0C\u907F\u514D\u91CD\u590D\u8BA1\u7B97\u3002\u7C7B\u4F3C Vue \u7684 computed \u5C5E\u6027\u3002\u53EF\u4EE5\u7528\u4E8E\u6027\u80FD\u4F18\u5316\uFF0C\u51CF\u5C11\u66F4\u65B0\u9891\u6B21\u3002
+
+\`\`\`js
+function ExpensiveComponent({ list }) {
+  // \u53EA\u6709\u5F53 list \u53D8\u5316\u65F6\u624D\u91CD\u65B0\u8BA1\u7B97
+  const sortedList = useMemo(() => {
+    return list.sort((a, b) => a.value - b.value);
+  }, [list]);
+
+  return <List items={sortedList} />;
+}
+\`\`\`
+
+### useCallback
+
+\u8BB0\u5FC6\u51FD\u6570\u3002\u7F13\u5B58\u51FD\u6570\u5F15\u7528\u3002\u7C7B\u4F3C useMemo \u7684\u4F5C\u7528\u3002\u53EA\u662F\u8FD4\u56DE\u7684\u662F\u51FD\u6570\uFF0C\u9700\u8981\u8C03\u7528\u3002
+
+\`\`\`jsx
+function Parent() {
+  const [count, setCount] = useState(0);
+
+  // \u8BB0\u5FC6\u5316\u51FD\u6570
+  const increment = useCallback(() => {
+    setCount(c => c + 1);
+  }, []);
+
+  // \u8BB0\u5FC6\u5316\u503C
+  const doubledCount = useMemo(() => {
+    return count * 2;
+  }, [count]);
+
+  return (
+    <div>
+      <Child onClick={increment} />
+      <div>Doubled: {doubledCount}</div>
+    </div>
+  );
+}
+\`\`\`
+
+### useImperativeHandle
+
+\u7528\u4E8E\u7236\u7EC4\u4EF6\u8C03\u7528\u5B50\u7EC4\u4EF6\u5B9E\u4F8B\uFF0C\u4E0E forwardRef \u914D\u5408\u4F7F\u7528
+
+\`\`\`js
+const FancyInput = forwardRef((props, ref) => {
+  const inputRef = useRef();
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current.focus();
+    },
+    clear: () => {
+      inputRef.current.value = '';
+    },
+  }));
+
+  return <input ref={inputRef} />;
+});
+
+function Parent() {
+  const inputRef = useRef();
+
+  return (
+    <>
+      <FancyInput ref={inputRef} />
+      <button onClick={() => inputRef.current.focus()}>Focus</button>
+    </>
+  );
+}
+\`\`\`
+
+## React 18 \u65B0\u589E Hooks
+
+### useId
+
+\u751F\u6210\u552F\u4E00 ID
+
+### useSyncExternalStore
+
+\u5916\u90E8\u5B58\u50A8\u540C\u6B65
+
+\`\`\`js
+function useOnlineStatus() {
+  const isOnline = useSyncExternalStore(subscribe, getSnapshot);
+
+  return isOnline;
+}
+\`\`\`
+
+### useInsertionEffect
+
+\u4E13\u4E3A CSS-in-JS \u5E93\u8BBE\u8BA1\uFF0C\u6BD4 useLayoutEffect \u66F4\u65E9\u6267\u884C
+
+\`\`\`js
+function useCSS(rule) {
+  useInsertionEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = rule;
+    document.head.appendChild(style);
+
+    return () => document.head.removeChild(style);
+  });
+
+  return rule;
+}
+\`\`\`
+
+## Hooks \u6267\u884C\u987A\u5E8F
+
+\`\`\`
+    [\u7EC4\u4EF6\u6E32\u67D3\u5F00\u59CB]
+          \u2193
+[useState/useReducer]
+          \u2193
+      [useMemo]
+          \u2193
+    [useCallback]
+          \u2193
+      [\u7EC4\u4EF6\u6E32\u67D3]
+          \u2193
+      [DOM\u66F4\u65B0]
+          \u2193
+  [useLayoutEffect]
+          \u2193
+      [\u6D4F\u89C8\u5668\u7ED8\u5236]
+          \u2193
+      [useEffect]
+\`\`\`
+
+\`\`\`jsx
+import { useState, useMemo, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
+
+function Demo() {
+  // 1. useState - \u6E32\u67D3\u5F00\u59CB\u65F6\u6267\u884C
+  const [count, setCount] = useState(0);
+
+  // 2. useMemo - \u6E32\u67D3\u671F\u95F4\u540C\u6B65\u6267\u884C
+  const memoizedValue = useMemo(() => {
+    console.log('useMemo executed');
+    return count * 2;
+  }, [count]);
+
+  // 3. useCallback - \u6E32\u67D3\u671F\u95F4\u540C\u6B65\u6267\u884C
+  const increment = useCallback(() => {
+    console.log('useCallback function created');
+    setCount(c => c + 1);
+  }, []);
+
+  // 4. useRef - \u6E32\u67D3\u671F\u95F4\u540C\u6B65\u6267\u884C
+  const ref = useRef();
+
+  // 5. useLayoutEffect - DOM\u66F4\u65B0\u540E\uFF0C\u7ED8\u5236\u524D\u6267\u884C
+  useLayoutEffect(() => {
+    console.log('useLayoutEffect executed');
+    if (ref.current) {
+      console.log('DOM element:', ref.current.clientWidth);
+    }
+    return () => console.log('useLayoutEffect cleanup');
+  }, [count]);
+
+  // 6. useEffect - \u7ED8\u5236\u5B8C\u6210\u540E\u6267\u884C
+  useEffect(() => {
+    console.log('useEffect executed');
+    return () => console.log('useEffect cleanup');
+  }, [count]);
+
+  console.log('Component rendered');
+
+  return (
+    <div ref={ref}>
+      <p>
+        Count: {count}, Memoized: {memoizedValue}
+      </p>
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
+}
+export default Demo;
+\`\`\`
+
+\u4F9D\u6B21\u8F93\u51FA\uFF1A
+
+\`\`\`
+useMemo executed
+Component rendered
+useLayoutEffect executed
+DOM element: 448
+useEffect executed
+
+// \u70B9\u51FB\u6309\u94AE\u540E
+useCallback function created
+useMemo executed
+Component rendered
+useLayoutEffect cleanup
+useLayoutEffect executed
+DOM element: 448
+useEffect cleanup
+useEffect executed
+\`\`\`
+
+## Hooks \u6BD4\u8F83
+
+### useMemo \u4E0E useEffect
+
+| \u7279\u6027     | useMemo                | useEffect                |
+| -------- | ---------------------- | ------------------------ |
+| \u6267\u884C\u65F6\u673A | \u6E32\u67D3\u671F\u95F4\u540C\u6B65\u6267\u884C       | \u7ED8\u5236\u540E\u5F02\u6B65\u6267\u884C           |
+| \u963B\u585E\u6E32\u67D3 | \u662F\uFF08\u540C\u6B65\u8BA1\u7B97\uFF09         | \u5426\uFF08\u5F02\u6B65\u6267\u884C\uFF09           |
+| \u8FD4\u56DE\u503C   | \u6709\uFF0C\u8FD4\u56DE\u8BA1\u7B97\u7ED3\u679C       | \u65E0\uFF0C\u4F46\u53EF\u4EE5\u8FD4\u56DE\u6E05\u7406\u51FD\u6570   |
+| \u4E3B\u8981\u7528\u9014 | \u4F18\u5316\u6027\u80FD\uFF0C\u907F\u514D\u91CD\u590D\u8BA1\u7B97 | \u5904\u7406\u526F\u4F5C\u7528\uFF0C\u6A21\u62DF\u751F\u547D\u5468\u671F |
+| \u4F9D\u8D56\u53D8\u5316 | \u7ACB\u5373\u91CD\u65B0\u8BA1\u7B97           | \u5F02\u6B65\u6267\u884C\u56DE\u8C03             |
+
+### useLayoutEffect \u4E0E useEffect
+
+| \u7279\u6027     | useLayoutEffect           | useEffect      |
+| -------- | ------------------------- | -------------- |
+| \u6267\u884C\u65F6\u673A | \u5728 DOM \u66F4\u65B0\u540E\u3001\u7ED8\u5236\u524D\u6267\u884C | \u5728\u7ED8\u5236\u540E\u6267\u884C   |
+| \u963B\u585E\u6E32\u67D3 | \u662F\uFF08\u540C\u6B65\u8BA1\u7B97\uFF09            | \u5426\uFF08\u5F02\u6B65\u6267\u884C\uFF09 |
+| \u4F7F\u7528\u573A\u666F | DOM \u6D4B\u91CF\u3001\u540C\u6B65\u66F4\u65B0        | \u6570\u636E\u83B7\u53D6\u3001\u8BA2\u9605 |
+| \u95EA\u70C1\u98CE\u9669 | \u907F\u514D\u5E03\u5C40\u6296\u52A8              | \u53EF\u80FD\u5F15\u8D77\u95EA\u70C1   |
+
+### useCallback \u4E0E useMemo
+
+| \u7279\u6027     | useCallback             | useMemo              |
+| -------- | ----------------------- | -------------------- |
+| \u8FD4\u56DE\u503C   | \u8FD4\u56DE\u8BB0\u5FC6\u5316\u7684\u51FD\u6570        | \u8FD4\u56DE\u8BB0\u5FC6\u5316\u7684\u503C       |
+| \u4F18\u5316\u76EE\u6807 | \u907F\u514D\u51FD\u6570\u91CD\u65B0\u521B\u5EFA        | \u907F\u514D\u8BA1\u7B97\u91CD\u590D\u6267\u884C     |
+| \u7B49\u4EF7\u5B9E\u73B0 | useMemo(() => fn, deps) | \u4E0D\u80FD\u76F4\u63A5\u66FF\u4EE3\u51FD\u6570\u8BB0\u5FC6 |
+| \u4E3B\u8981\u7528\u9014 | \u4F18\u5316\u5B50\u7EC4\u4EF6\u907F\u514D\u91CD\u6E32\u67D3    | \u4F18\u5316\u590D\u6742\u8BA1\u7B97\u6027\u80FD     |
+
+### useRef \u4E0E useState
+
+| \u7279\u6027       | useRef               | useState         |
+| ---------- | -------------------- | ---------------- |
+| \u89E6\u53D1\u91CD\u6E32\u67D3 | \u5426                   | \u662F               |
+| \u503C\u66F4\u65B0\u65F6\u673A | \u7ACB\u5373\u66F4\u65B0             | \u4E0B\u6B21\u6E32\u67D3\u65F6\u66F4\u65B0   |
+| \u8BBF\u95EE\u5F53\u524D\u503C | ref.current          | \u901A\u8FC7\u72B6\u6001\u53D8\u91CF     |
+| \u4E3B\u8981\u7528\u9014   | DOM \u5F15\u7528\u3001\u5B58\u50A8\u53EF\u53D8\u503C | \u7BA1\u7406\u6E32\u67D3\u76F8\u5173\u72B6\u6001 |
+| \u6301\u4E45\u6027     | \u8DE8\u6E32\u67D3\u6301\u4E45\u5316         | \u6BCF\u6B21\u6E32\u67D3\u72EC\u7ACB     |
+
+## React SSR
+
+\u901A\u8FC7\u9605\u8BFB[\u300AReact SSR \u8BE6\u89E3\u3010\u8FD1 1W \u5B57\u3011+ 2 \u4E2A\u9879\u76EE\u5B9E\u6218\u300B](https://juejin.cn/post/6844904017487724557)\uFF0C\u5927\u81F4\u5F52\u7EB3\u77E5\u8BC6\u70B9\u5982\u4E0B\uFF1A
+
+- \u5BA2\u6237\u7AEF\u6E32\u67D3\uFF08Client Side Rendering\uFF09
+
+![csr](https://chenqiuling.github.io/frontend-notes-viewer/images/img_csr.awebp)
+
+- \u670D\u52A1\u7AEF\u6E32\u67D3\uFF08Server Side Rendering\uFF09
+
+![ssr](https://chenqiuling.github.io/frontend-notes-viewer/images/img_ssr.awebp)
+
+> SSR \u662F\u6307\u5C06\u5355\u9875\u5E94\u7528\uFF08SPA\uFF09\u5728\u670D\u52A1\u5668\u7AEF\u6E32\u67D3\u6210 HTML \u7247\u6BB5\uFF0C\u53D1\u9001\u5230\u6D4F\u89C8\u5668\uFF0C\u7136\u540E\u4EA4\u7531\u6D4F\u89C8\u5668\u4E3A\u5176\u7ED1\u5B9A\u72B6\u6001\u4E0E\u4E8B\u4EF6\uFF0C\u6210\u4E3A\u5B8C\u5168\u53EF\u4EA4\u4E92\u9875\u9762\u7684\u8FC7\u7A0B\u3002
+
+- \u4F18\u70B9\uFF1A\u66F4\u5FEB\u7684\u9996\u5C4F\u6E32\u67D3\u548C\u66F4\u53CB\u597D\u7684 SEO\u3002
+- \u7F3A\u70B9\uFF1A\u670D\u52A1\u5668\u6027\u80FD\u6D88\u8017\u9AD8\uFF1B\u9879\u76EE\u53D8\u66F4\u590D\u6742\uFF08\u524D\u7AEF+node+\u540E\u7AEF\uFF09\uFF1B\u9700\u8981\u8003\u8651 SSR \u673A\u5668\u7684\u8FD0\u7EF4\u3001\u7533\u8BF7\u3001\u6269\u5BB9\uFF0C\u589E\u52A0\u4E86\u8FD0\u7EF4\u6210\u672C\u3002
+
+\u5355\u9875\u5E94\u7528\u4E2D\u5982\u4F55\u5224\u65AD\u5F53\u524D\u9875\u9762\u662F SSR \u8FD8\u662F CSR\uFF1F
+
+> \u67E5\u770B\u7F51\u9875\u6E90\u4EE3\u7801\uFF0C\u5982\u679C \`<div id="root">\` DOM \u91CC\u7684\u5143\u7D20\u4E0D\u4E3A\u7A7A\uFF0C\u5219\u662F SSR\uFF0C\u5426\u5219\u4E3A CSR\u3002[umi](https://umijs.org/docs/ssr#antd-pro-%E6%80%8E%E6%A0%B7%E4%BD%BF%E7%94%A8%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B8%B2%E6%9F%93%EF%BC%9F)
+
+window is not defined, document is not defined, navigator is not defined
+
+> SSR \u56E0\u4E3A\u4F1A\u5728\u670D\u52A1\u7AEF\u6267\u884C render \u6E32\u67D3\u65B9\u6CD5\uFF0C\u800C\u670D\u52A1\u7AEF\u6CA1\u6709 DOM/BOM \u53D8\u91CF\u548C\u65B9\u6CD5\u3002
+
+## React \u4F18\u5316
+
+### \u7C7B\u7EC4\u4EF6 PureComponent\u3001shouldComponentUpdate
+
+\`\`\`jsx
+import React, { PureComponent } from 'react';
+
+export default class Child extends PureComponent {}
+\`\`\`
+
+\u6216
+
+\`\`\`jsx
+import React, { Component } from 'react';
+
+export default class Child extends Component {
+  // shouldComponentUpdate \u9ED8\u8BA4\u8FD4\u56DEtrue\uFF0C\u6240\u4EE5\u5982\u679C\u4E0D\u505A\u7279\u6B8A\u5904\u7406\uFF0C\u503C\u662F\u5426\u6539\u53D8\u90FD\u4F1A\u89E6\u53D1\u91CD\u590D\u6E32\u67D3
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.A !== nextProps.A) {
+      return true;
+    }
+    if (this.state.B !== nextState.B) {
+      return true;
+    }
+    return false;
+  }
+}
+\`\`\`
+
+### memo \u4F18\u5316
+
+- \u573A\u666F\uFF1A\u7236\u7EC4\u4EF6\u5411\u5B50\u7EC4\u4EF6\u4F20\u503C A\uFF0C\u7236\u7EC4\u4EF6\u5185\u90E8\u7684 B \u6539\u53D8\u4F1A\u5BFC\u81F4\u5B50\u7EC4\u4EF6\u7684\u91CD\u65B0\u6E32\u67D3
+- \u671F\u671B\uFF1A\u5728\u4EE5\u4E0A\u573A\u666F\u4E2D\uFF0C\u6211\u4EEC\u5E0C\u671B\u53EA\u6709 A \u7684\u6539\u53D8\u624D\u4F1A\u89E6\u53D1\u5B50\u7EC4\u4EF6\u7684\u91CD\u65B0\u6E32\u67D3
+- \u5B9E\u73B0\uFF1A\u5BF9\u5B50\u7EC4\u4EF6\u505A\u4EE5\u4E0B\u5904\u7406
+
+\`\`\`jsx
+import React, { FC, memo } from 'react';
+
+const Child: FC = memo(() => {});
+
+export default memo(Child, (prevProps, nextProps) => prevProps === nextProps);
+// \u5BF9\u8C61\u3001\u6570\u7EC4\u4E0D\u80FD\u76F4\u63A5\u6BD4\u8F83\uFF0C\u76F8\u7B49\u8FD4\u56DE true \u4E0D\u91CD\u65B0\u6E32\u67D3\uFF0C\u4E0E shouldComponentUpdate \u76F8\u53CD\uFF0C\u540E\u8005\u662F\u4E0D\u76F8\u7B49\u8FD4\u56DE true \u91CD\u65B0\u6E32\u67D3
+\`\`\`
+
+> \u4E0E class \u7EC4\u4EF6\u4E2D shouldComponentUpdate() \u65B9\u6CD5\u4E0D\u540C\u7684\u662F\uFF0C\u5982\u679C props \u76F8\u7B49\uFF0CareEqual \u4F1A\u8FD4\u56DE true\uFF1B\u5982\u679C props \u4E0D\u76F8\u7B49\uFF0C\u5219\u8FD4\u56DE false\u3002\u8FD9\u4E0E shouldComponentUpdate \u65B9\u6CD5\u7684\u8FD4\u56DE\u503C\u76F8\u53CD\u3002
+
+### Suspense \u548C lazy()\u4F18\u5316
+
+16.6 \u7248\u672C\u4E2D\u65B0\u589E\u4E86 Suspense\u3001lazy()\u6765\u5B9E\u73B0 react \u4EE3\u7801\u7684 code splitting
+
+\`\`\`jsx
+import React, { lazy, Suspense } from 'react'
+
+const home = lazy(() => import('src/page/index'))
+const comA = lazy(() => import('src/page/A'))
+
+<Suspense fallback={<Loading />}>
+  <Switch>
+    <Route path="/" component={home}>
+    <Route path="/A" component={comA}>
+  </Switch>
+</Suspense>
+\`\`\`
+
+### useCallback / useMemo
+
+\u5177\u4F53\u770B Hooks \u90E8\u5206\u3002
+
+### \u5176\u4ED6
+
+#### \u51CF\u5C11 render \u4E2D\u76F4\u63A5\u5185\u5D4C\u7BAD\u5934\u51FD\u6570\u7684\u5199\u6CD5
+
+\`\`\`js
+onClick={() => {
+  doSomething();
+}}
+\`\`\`
+
+\u4EE5\u4E0A\u5199\u6CD5\u6BCF\u6B21\u8C03\u7528 render \u51FD\u6570\u65F6\u5747\u4F1A\u521B\u5EFA\u4E00\u4E2A\u65B0\u7684\u51FD\u6570\uFF0C\u5373\u4F7F\u5185\u5BB9\u6CA1\u6709\u53D1\u751F\u53D8\u5316\u4E5F\u4F1A\u5BFC\u81F4\u8282\u70B9\u6CA1\u5FC5\u8981\u7684\u91CD\u65B0\u6E32\u67D3\uFF0C\u5EFA\u8BAE\u5C06\u51FD\u6570\u4FDD\u5B58\u5728\u7EC4\u4EF6\u7684\u6210\u5458\u5BF9\u8C61\u4E2D\uFF0C\u8FD9\u6837\u51FD\u6570\u53EA\u4F1A\u88AB\u521B\u5EFA\u4E00\u6B21\u3002
+
+#### \u6839\u636E react diff \u7B97\u6CD5\u539F\u7406\u4F18\u5316\u4EE3\u7801
+
+- \u5E94\u5C3D\u91CF\u907F\u514D\u8DE8\u5C42\u7EA7\u8282\u70B9\u79FB\u52A8
+- \u8BBE\u7F6E\u552F\u4E00 Key \u8FDB\u884C\u4F18\u5316\uFF0C\u5C3D\u91CF\u51CF\u5C11\u7EC4\u4EF6\u5C42\u7EA7\u6DF1\u5EA6\uFF1B
+- \u901A\u8FC7 shouldComponentUpdate \u6216\u8005 pureComoent\u3001memo \u7B49\u51CF\u5C11 diff \u6B21\u6570
+
+#### \u51CF\u5C11\u6E32\u67D3\u5F02\u5E38
+
+\u5728 react \u4E2D\u53D1\u751F js \u8BED\u6CD5\u9519\u8BEF\uFF0C\u4F1A\u5BFC\u81F4\u9875\u9762\u767D\u5C4F\u5D29\u6E83\uFF0C\u5982\u540E\u7AEF\u63A5\u53E3\u6570\u636E\u8FD4\u56DE obj \u503C\u4E3A null\uFF0C\u6B64\u65F6 obj.a \u5C31\u4F1A\u62A5\u9519\uFF0C\u53EF\u4EE5\u901A\u8FC7\u53EF\u9009\u94FE\u7684\u65B9\u5F0F\u5B9E\u73B0\uFF0Cobj?.a\u3002
+
+\u5B9E\u73B0\u4E00\u4E2A ErrorBoundary \u9AD8\u9636\u7EC4\u4EF6\uFF0C\u5305\u88F9\u5B50\u7EC4\u4EF6\uFF0C\u5C55\u793A\u9519\u8BEF\u4FE1\u606F
+
+\`\`\`jsx
+class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    logErrorToService(error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong</h1>;
+    }
+    return this.props.children;
+  }
+}
+
+// \u4F7F\u7528
+<ErrorBoundary>
+  <MyComponent />
+</ErrorBoundary>;
+\`\`\`
+
+## React \u539F\u7406\u76F8\u5173
+
+### \u865A\u62DF DOM
+
+\u597D\u5904\uFF1A\u7B80\u5316\u5F00\u53D1\uFF1B\u9632\u6B62 XSS\uFF1B\u8DE8\u5E73\u53F0\u6210\u672C\u8F83\u4F4E\uFF1B
+
+\u7F3A\u70B9\uFF1A\u5185\u5B58\u5360\u7528\u8F83\u9AD8\uFF1B\u65E0\u6CD5\u8FDB\u884C\u6781\u81F4\u4F18\u5316\uFF1B
+
+\u901A\u8FC7 diff \u51FD\u6570\uFF0C\u53BB\u8BA1\u7B97\u72B6\u6001\u53D8\u66F4\u524D\u540E\u7684\u865A\u62DF Dom \u6811\u5DEE\u5F02\uFF1B
+
+\u901A\u8FC7\u6E32\u67D3\u51FD\u6570\uFF0C\u6E32\u67D3\u6574\u4E2A\u865A\u62DF DOM \u6811\u6216\u5904\u7406\u5DEE\u5F02\u70B9\uFF1B
+
+\uFF081\uFF09\u865A\u62DF DOM \u4E00\u5B9A\u6BD4\u771F\u5B9E DOM \u64CD\u4F5C\u6027\u80FD\u66F4\u9AD8\u5417\uFF1F
+
+- \u5F53\u5927\u91CF\u7684\u76F4\u63A5\u64CD\u4F5C DOM \u65F6\u5BB9\u6613\u5F15\u8D77\u7F51\u9875\u6027\u80FD\u4E0B\u964D\uFF0C\u8FD9\u65F6 React \u57FA\u4E8E\u865A\u62DF DOM \u7684 diff \u5904\u7406\u4E0E\u6279\u5904\u7406\u64CD\u4F5C\uFF0C\u53EF\u964D\u4F4E DOM \u7684\u64CD\u4F5C\u8303\u56F4\u548C\u9891\u6B21\uFF0C\u63D0\u5347\u9875\u9762\u6027\u80FD\u3002
+- \u9996\u6B21\u6E32\u67D3\u548C\u5FAE\u91CF DOM \u64CD\u4F5C\u65F6\uFF0C\u865A\u62DF DOM \u4F1A\u6BD4\u771F\u5B9E DOM \u6162\u3002
+
+\uFF082\uFF09\u865A\u62DF DOM \u4E00\u5B9A\u53EF\u4EE5\u89C4\u907F XSS \u5417\uFF1F
+
+- \u865A\u62DF DOM \u5185\u90E8\u786E\u4FDD\u5B57\u7B26\u8F6C\u4E49\uFF0C\u786E\u5B9E\u53EF\u4EE5\u505A\u5230\u8FD9\u70B9\uFF0C\u4F46 React \u7559\u6709 dangerouslySetInnerHTML API\uFF0C\u53EF\u4EE5\u7ED5\u8FC7\u8F6C\u4E49\u3002
+
+### Diff \u7B97\u6CD5
+
+\uFF081\uFF09\u9996\u5148\u5C06\u771F\u5B9E\u7684 DOM \u6620\u5C04\u4E3A\u865A\u62DF DOM\uFF1B
+
+\uFF082\uFF09\u5F53\u865A\u62DF DOM \u53D8\u5316\u540E\u4F1A\u6839\u636E\u5DEE\u8DDD\u8BA1\u7B97\u751F\u6210 patch\uFF08\u7ED3\u6784\u5316\u7684\u6570\u636E\uFF0C\u5305\u542B\u589E\u52A0\u3001\u66F4\u65B0\u3001\u79FB\u9664\u7B49\uFF09\uFF1B
+
+\uFF083\uFF09\u6839\u636E patch \u53BB\u66F4\u65B0\u771F\u5B9E\u7684 DOM\uFF1B
+
+- \u66F4\u65B0\u65F6\u673A\uFF1Astate \u53D8\u5316\uFF08setState\u3001useState...)
+
+- \u904D\u5386\u7B97\u6CD5\uFF1A\u91C7\u7528\u6DF1\u5EA6\u4F18\u5148\u904D\u5386\uFF08\u6DF1\u5EA6\uFF1A\u6839-\u5DE6 1-\u5DE6 2-\u53F3 1-\u53F3 2\uFF1B\u5E7F\u5EA6\uFF1A\u6839-\u5DE6 1-\u53F3 1-\u5DE6 2-\u53F3 2\uFF09
+  \u56E0\u4E3A\u5E7F\u5EA6\u4F18\u5148\u904D\u5386\u53EF\u80FD\u4F1A\u4F7F React \u7684\u751F\u547D\u5468\u671F\u65F6\u5E8F\u9519\u4E71\u3002
+
+![image](https://chenqiuling.github.io/frontend-notes-viewer/images/img_tree_dfs.png)
+![image](https://chenqiuling.github.io/frontend-notes-viewer/images/img_tree_bfs.png)
+
+- \u4F18\u5316\u7B56\u7565\uFF1A
+
+\u4F20\u7EDF diff \u901A\u8FC7\u5FAA\u73AF\u9012\u5F52\u5BF9\u6240\u6709\u8282\u70B9\u8FDB\u884C\u4F9D\u6B21\u6BD4\u8F83\uFF0C\u7B97\u6CD5\u590D\u6742\u5EA6\u8FBE O(n^3)\uFF1B
+
+React \u901A\u8FC7\u201C\u5206\u800C\u6CBB\u4E4B\u201D\u7684\u65B9\u5F0F\uFF0C\u5C06\u7B97\u6CD5\u590D\u6742\u5EA6\u964D\u4E3A O(n)\u3002
+
+**\u7B56\u7565\u4E00\uFF1A\u540C\u5C42\u6BD4\u8F83\uFF08tree diff\uFF09**
+
+\u5FFD\u7565\u8282\u70B9\u8DE8\u5C42\u7EA7\u64CD\u4F5C\u573A\u666F\uFF0C\u63D0\u5347\u6BD4\u5BF9\u6548\u7387\uFF1B
+
+\u901A\u8FC7 updateDepth \u5BF9 Virtual DOM \u6811\u8FDB\u884C\u5C42\u7EA7\u63A7\u5236\uFF0C\u4E24\u68F5\u6811**\u53EA\u5BF9\u540C\u4E00\u5C42\u7EA7**\u8282\u70B9\u8FDB\u884C\u6BD4\u8F83\uFF0C\u5982\u53D1\u73B0\u8282\u70B9\u5DF2\u4E0D\u5B58\u5728\uFF0C\u5219\u8BE5\u8282\u70B9\u53CA\u5176\u5B50\u8282\u70B9\u4F1A\u88AB\u5B8C\u5168\u5220\u9664\uFF0C\u4E0D\u518D\u8FDB\u4E00\u6B65\u6BD4\u8F83\uFF1B
+
+\`\`\`
+     A                     A
+   /   \\                /  |  \\
+  B     C              B   C   E
+ / \\   / \\             |  / \\
+D   E F   G            D  F  G
+\`\`\`
+
+\u5F53\u51FA\u73B0\u8DE8 DOM \u5C42\u7EA7\u7684\u7EC4\u4EF6\u64CD\u4F5C\uFF0Creact \u53D1\u73B0\u591A\u4E86\u4E00\u4E2A\u5C42\u7EA7\u5C31\u521B\u5EFA\uFF0C\u5C11\u4E86\u4E00\u4E2A\u5C42\u7EA7\u5C31\u5220\u9664\uFF0C\u5982\u5C06 E \u79FB\u52A8\u5230 A \u7684\u76F4\u63A5\u5B50\u8282\u70B9\uFF0C\u5219 createE->createE child node->deleteE
+
+\u56E0\u4E3A\u8DE8\u5C42\u7EA7\u64CD\u4F5C\uFF0C\u76F4\u63A5\u64CD\u4F5C dom \u5143\u7D20\uFF0C\u4F1A\u5F71\u54CD\u6027\u80FD\uFF0Creact \u5B98\u65B9\u4E0D\u63A8\u8350\u6B64\u505A\u6CD5\u3002
+
+**\u7B56\u7565\u4E8C\uFF1Acomponent diff**
+
+\u62E5\u6709\u76F8\u540C class \u7684\u4E24\u4E2A\u7EC4\u4EF6\uFF0C\u4F1A\u751F\u6210\u76F8\u4F3C\u7684\u6811\u5F62\u7ED3\u6784\uFF0C\u62E5\u6709\u4E0D\u540C\u7C7B\u7684\u5219\u751F\u6210\u4E0D\u540C\u7684\u6811\u5F62\u7ED3\u6784\uFF1B
+
+1. \u540C\u4E00\u7C7B\u578B\u7684\u7EC4\u4EF6\u6309 tree diff\uFF0C\u53EF\u4EE5\u4F7F\u7528 shouldComponentUpdate()\u3001memo \u7B49\u6765\u4F18\u5316\uFF0C\u51CF\u5C11\u4E0D\u5FC5\u8981\u7684 diff \u7B97\u6CD5\u3002
+2. \u5BF9\u4E8E\u4E0D\u540C\u7C7B\u578B\u7684\u7EC4\u4EF6\uFF0C\u6574\u4E2A\u66FF\u6362\u7EC4\u4EF6\u4E0B\u6240\u6709\u5B50\u8282\u70B9\uFF1B
+
+**\u7B56\u7565\u4E09\uFF1Akey \u4F18\u5316\uFF08element diff\uFF09**
+
+\u5BF9\u4E8E\u540C\u4E00\u5C42\u7EA7\u7684\u5B50\u8282\u70B9\uFF0C\u901A\u8FC7**\u552F\u4E00 key**\u6765\u533A\u5206
+
+\u5F53\u8282\u70B9\u5904\u4E8E\u540C\u4E00\u5C42\u7EA7\u65F6\uFF0CReact diff \u63D0\u4F9B\u4E86\u4E09\u79CD\u8282\u70B9\u64CD\u4F5C\uFF0C\u5206\u522B\u4E3A\uFF1AINSERT_MARKUP\uFF08\u63D2\u5165\uFF09\u3001MOVE_EXISTING\uFF08\u79FB\u52A8\uFF09\u548C REMOVE_NODE\uFF08\u5220\u9664\uFF09\u3002
+
+\u901A\u8FC7 key \u5224\u65AD\u662F\u5426\u5B58\u5728\u76F8\u540C\u8282\u70B9\uFF0C\u4ECE\u800C\u786E\u5B9A\u662F\u63D2\u5165\uFF0C\u79FB\u52A8\u8FD8\u662F\u5220\u9664\u64CD\u4F5C\u3002
+
+### Fiber \u673A\u5236
+
+- Fiber \u673A\u5236\u4E0B\u8282\u70B9\u548C\u6811\u5206\u522B\u91C7\u7528 FiberNode \u4E0E FiberTree \u8FDB\u884C\u91CD\u6784\uFF1B
+
+FiberNode \u91C7\u7528\u4E86\u53CC\u94FE\u8868\u7ED3\u6784\uFF0C\u53EF\u4EE5\u76F4\u63A5\u627E\u5230\u5144\u5F1F\u8282\u70B9\u548C\u5B50\u8282\u70B9\uFF0C\u4F7F\u5F97\u6574\u4E2A\u66F4\u65B0\u8FC7\u7A0B\u53EF\u4EE5\u968F\u65F6\u4E2D\u65AD\u3001\u6062\u590D\uFF08\u65F6\u95F4\u5206\u7247\u80FD\u529B\uFF09\u3002
+
+FiberTree \u662F\u7531 FiberNode \u6784\u6210\u7684\u6811\u3002
+
+- Fiber \u673A\u5236\u4E0B\u6574\u4E2A\u66F4\u65B0\u8FC7\u7A0B\u7531 current \u4E0E workInProgress \u4E24\u682A\u6811\u53CC\u7F13\u51B2\u5B8C\u6210\u3002
+
+\u5728 react 16 \u7248\u672C\u4E4B\u524D\uFF0CStack Reconciler \u4F7F\u7528\u540C\u6B65\u9012\u5F52\u7B97\u6CD5\uFF0C\u4F9D\u8D56\u4E8E\u5185\u7F6E\u5806\u6808\u7684\u904D\u5386\uFF0C\u4F1A\u6709\u6389\u5E27\u7684\u95EE\u9898\u3002
+
+\u5728 react 16.0 \u7248\u672C\u4E2D\uFF0C\u5B9E\u73B0\u4E86 [React Fiber](https://github.com/facebook/react/pull/7154/files)\uFF0C\u6B64\u7248\u672C\u4E2D\u4F7F\u7528\u4E86 window.requestAnimationFrame() \u548C window.requestIdleCallback() \u5728\u6D4F\u89C8\u5668\u7684\u7A7A\u95F2\u65F6\u6BB5\u5185\u8C03\u7528\u4F18\u5148\u7EA7\u4F4E\u7684\u51FD\u6570\u3002
+
+\u5728\u6784\u5EFA\u65B0\u7684 Fiber \u6811\u8FC7\u7A0B\u4E2D\uFF0C\u6BCF\u751F\u6210\u4E00\u4E2A\u8282\u70B9\u90FD\u5C06\u63A7\u5236\u6743\u4EA4\u7ED9\u4E3B\u7EBF\u7A0B\uFF0C\u770B\u662F\u5426\u6709\u4F18\u5148\u7EA7\u66F4\u9AD8\u7684\u4EFB\u52A1\uFF0C\u6CA1\u6709\u624D\u4F1A\u7EE7\u7EED\u6784\u5EFA\u6811\u3002
+
+\u5982\u679C\u8FC7\u7A0B\u4E2D\u6709\u4F18\u5148\u7EA7\u66F4\u9AD8\u7684\u4EFB\u52A1\u9700\u8981\u8FDB\u884C\uFF0C\u5219 Fiber Reconciler \u4F1A\u4E22\u5F03\u6B63\u5728\u751F\u6210\u7684\u6811\uFF0C\u5728\u7A7A\u95F2\u7684\u65F6\u5019\u518D\u91CD\u65B0\u6267\u884C\u4E00\u904D\u3002
+
+\u4F46\u4F7F\u7528 requestIdleCallback \u5B9E\u9645\u4E0A\u6709\u4E00\u4E9B\u9650\u5236\uFF0C\u6267\u884C\u9891\u6B21\u4E0D\u8DB3\uFF0C\u4EE5\u81F4\u4E8E\u65E0\u6CD5\u5B9E\u73B0\u6D41\u7545\u7684 UI \u6E32\u67D3\uFF0C\u6269\u5C55\u6027\u5DEE\u3002
+
+**\u5728\u540E\u6765\u7684\u7248\u672C\u4E2D\uFF0Creact \u56E2\u961F\u5DF2\u7ECF\u5F03\u7528 requestIdleCallback\uFF0C\u5B9E\u73B0\u4E86\u81EA\u5B9A\u4E49\u7684\u7248\u672C\u3002**
+
+\u6E90\u7801\u4F4D\u7F6E\uFF1Areact/packages/react-reconciler/src\uFF0C\u4ECE\u6E90\u7801\u76EE\u5F55\u7ED3\u6784\u4E0A\u770B\uFF0C\u51E0\u4E4E\u6BCF\u4E2A\u5BF9\u8C61\u90FD\u6709\u4E00\u4E2A.new.js \u548C.old.js
+
+[\u300AReact Fiber \u6E90\u7801\u89E3\u6790\u300B](https://segmentfault.com/a/1190000023573713)\u8FD9\u7BC7\u6587\u7AE0\u91CC\uFF0C\u5BF9 Current \u6811\u548C WorkInProgress \u6811\u7684\u89E3\u91CA\uFF0C\u5927\u81F4\u5F52\u7EB3\u77E5\u8BC6\u70B9\u5982\u4E0B\uFF1A
+
+- react \u7684\u6574\u4E2A\u751F\u547D\u5468\u671F\u5927\u81F4\u5206\u4E3A render \u548C commit \u4E24\u4E2A\u9636\u6BB5\u3002
+- \u9875\u9762\u5728\u9996\u6B21\u6E32\u67D3\u540E\u751F\u6210 Fiber \u6811\uFF0C\u8BB0\u505A current \u6811\uFF0C\u5728 current \u6811\u751F\u6210\u4E4B\u524D\u6267\u884C componentDidMount\uFF0C\u4E4B\u540E\u5219\u6267\u884C componentDidUpdate\u3002
+- \u5F53 react \u904D\u5386 current \u6811\u65F6\uFF08\u9700\u8981 diff \u65F6\uFF09\uFF0C\u4F1A\u4E3A\u5176\u6BCF\u4E2A\u8282\u70B9\u751F\u6210\u4E00\u4E2A\u66FF\u4EE3\u8282\u70B9\uFF0C\u8FD9\u4E9B\u66FF\u4EE3\u8282\u70B9\u6784\u6210\u7684\u6811\u8BB0\u505A workInProgress \u6811\u3002
+- \u5F53 workInProgress \u6811\u88AB\u63D0\u4EA4\u540E\uFF0C\u4F1A\u5728 commit \u9636\u6BB5\u7684\u67D0\u4E00\u5B50\u9636\u6BB5\u66FF\u6362\u6389 current \u6811\u3002
+
+### JSX \u6E32\u67D3\u539F\u7406
+
+1.\u57FA\u4E8E babel-preset-react-app \u7684\u8BED\u6CD5\u89E3\u6790\u5305\uFF0C\u628A jsx \u7684\u5185\u5BB9\u8F6C\u6362\u6210 React.createElement()\u7684\u65B9\u6CD5\u8C03\u7528\u3002
+
+\`\`\`jsx
+const element = (
+  <div className="greeting">hello world</div>
+)
+
+const element2 = (
+  <ul>
+    <li>A</li>
+    <li>B</li>
+  <ul>
+)
+\`\`\`
+
+\u8F6C\u6362\u540E\uFF1A
+
+\`\`\`jsx
+const element = React.createElement('div', { className: 'greeting' }, 'hello world');
+
+const element2 = React.createElement(
+  'ul',
+  null,
+  React.createElement('li', null, 'A'),
+  React.createElement('li', null, 'B'),
+);
+\`\`\`
+
+2.createElement()\u4F1A\u628A\u6240\u6709 html \u6807\u7B7E\u8F6C\u6362\u6210\u4E00\u4E2A json \u5BF9\u8C61\u3002
+
+\`\`\`
+{
+  type: 'div', --\u6807\u7B7E\u540D\u6216\u7EC4\u4EF6\u540D
+  props: {
+    style: '',
+    className: '',
+    children: [] --\u6709\u5B50\u5143\u7D20\u624D\u6709\uFF0C\u53EF\u80FD\u662F\u4E00\u4E2A\u6570\u7EC4\uFF0C\u4E5F\u53EF\u80FD\u662F\u4E00\u4E2A\u5B57\u7B26\u4E32\u6216\u8005\u662F\u4E00\u4E2A\u5BF9\u8C61\u3002
+  },
+  key: null,
+  ref: null
+}
+\`\`\`
+
+\u4F8B\u5982\uFF1A
+
+\`\`\`js
+const element = {
+  type: 'div',
+  props: {
+    className: 'greeting',
+    children: 'hello world',
+  },
+};
+\`\`\`
+
+3.\u57FA\u4E8E render \u628A jsx \u5BF9\u8C61\u6309\u7167\u52A8\u6001\u521B\u5EFA dom \u5143\u7D20\u7684\u65B9\u5F0F\u63D2\u5165\u5230\u6307\u5B9A\u7684\u5BB9\u5668\u4E2D\u3002
+
+render(jsx, container, callback)
+
+\`\`\`jsx
+ReactDOM.render(<h1>\u6807\u9898</h1>, document.getElementById('root'));
+\`\`\`
+
+true\u3001false\u3001null\u3001undefined \u90FD\u4E0D\u4F1A\u88AB\u6E32\u67D3\u3002
+
+### \u7F13\u5B58\u7B97\u6CD5
+
+- LRU \u7B97\u6CD5: Least Recently Used \u6700\u8FD1\u6700\u5C11\u4F7F\u7528\u7B97\u6CD5(\u6839\u636E\u65F6\u95F4);
+- LFU \u7B97\u6CD5: Least Frequently Used \u6700\u8FD1\u6700\u5C11\u4F7F\u7528\u7B97\u6CD5(\u6839\u636E\u6B21\u6570);
+
+react-cache \u91C7\u7528\u7684\u662F LRU \u7B97\u6CD5\u3002
+\u7F13\u5B58\u6570\u636E\u5E93 Redis \u5E95\u5C42\u4E5F\u91C7\u7528\u7684 LRU \u7B97\u6CD5\u3002
+
+LRU
+
+\u7531 key-value \u7EC4\u6210\u7684\u54C8\u5E0C\u6570\u636E\u94FE\u8868\uFF0C\u5047\u8BBE\u6700\u957F\u7F13\u5B58\u7684\u94FE\u8868\u957F\u5EA6\u4E3A 5\uFF0C\u6BCF\u6B21\u8BBF\u95EE\u4E00\u4E2A\u503C\u4ECE\u53F3\u4FA7\u63D2\u5165\u94FE\u8868\u3002
+
+\u5047\u8BBE\u73B0\u6709\u7F13\u5B58\u5217\u8868 A-B-C-D\uFF0C\u73B0\u5728\u65B0\u8BBF\u95EE E\uFF0C\u63D2\u5165\u540E A-B-C-D-E
+
+\u518D\u6B21\u8BBF\u95EE B\uFF0C\u6B64\u65F6\u628A B \u4ECE\u94FE\u8868\u4E2D\u79FB\u9664\uFF0C\u518D\u63D2\u5165\u672B\u5C3E\uFF0C\u5373 A-C-D-E-B
+
+\u6B64\u65F6\u8BBF\u95EE\u65B0\u7684 F\uFF0C\u56E0\u4E3A\u9650\u5236\u6700\u5927\u7F13\u5B58\u957F\u5EA6\u4E3A 5\uFF0C\u5219\u5220\u9664\u6700\u5DE6\u8FB9\u7684\u503C\uFF08\u8BE5\u503C\u4E3A\u6700\u8FD1\u6700\u5C11\u8BBF\u95EE\u7684\u503C\uFF09\uFF0C\u518D\u63D2\u5165 F\uFF0C\u5373 C-D-E-B-F
+
+### \u601D\u8003
+
+1. \u4E3A\u4EC0\u4E48 react \u4E2D\u7ED1\u5B9A\u4E8B\u4EF6\u4E0D\u9700\u8981\u4E8B\u4EF6\u59D4\u6258\uFF1F
+
+React \u5B9E\u73B0\u4E86\u81EA\u5DF1\u7684\u4E8B\u4EF6\u7CFB\u7EDF\uFF0C\u79F0\u4E3A\u5408\u6210\u4E8B\u4EF6\uFF0C\u5176\u5185\u90E8\u81EA\u52A8\u5B9E\u73B0\u4E86\u4E8B\u4EF6\u59D4\u6258\u3002
+`}}]);

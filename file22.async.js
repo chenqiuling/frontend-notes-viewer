@@ -1,0 +1,310 @@
+"use strict";(self.webpackChunkfrontend_notes=self.webpackChunkfrontend_notes||[]).push([[9608],{33026:function(o,n,e){e.r(n),n.default=`[[toc]] <!-- \u63D2\u4EF6\u4F1A\u81EA\u52A8\u5728\u6B64\u4F4D\u7F6E\u63D2\u5165\u76EE\u5F55 -->
+
+## \u4E8B\u4EF6\u5FAA\u73AF(Event Loop)
+
+### \u6838\u5FC3\u6982\u5FF5
+
+- JavaScript \u662F\u5355\u7EBF\u7A0B\u8BED\u8A00\uFF0C\u901A\u8FC7\u4E8B\u4EF6\u5FAA\u73AF\u673A\u5236\u5B9E\u73B0\u5F02\u6B65\u3002
+- \u8C03\u7528\u6808(Call Stack)\u3001\u4EFB\u52A1\u961F\u5217(Task Queue)\u3001\u5FAE\u4EFB\u52A1\u961F\u5217(Microtask Queue)\u7684\u534F\u4F5C\u673A\u5236\u3002
+
+**\u601D\u8003 1\uFF1A\u4E3A\u4EC0\u4E48 JavaScript \u662F\u5355\u7EBF\u7A0B**
+
+- \u5982\u679C js \u8BBE\u8BA1\u6210\u591A\u7EBF\u7A0B\u7684\uFF0C\u90A3\u4E48\u5F53\u540C\u65F6\u5BF9\u4E00\u4E2A DOM \u8FDB\u884C\u64CD\u4F5C\u65F6\uFF0C\u6D4F\u89C8\u5668\u96BE\u4EE5\u505A\u51FA\u4F18\u5148\u7EA7\u5224\u65AD\u3002\u5982\u679C\u52A0\u5165\u9501\u673A\u5236\u5219\u4F1A\u589E\u52A0\u8BED\u8A00\u7684\u590D\u6742\u5EA6\u3002
+- JavaScript \u7684\u6267\u884C\u73AF\u5883\uFF08\u6700\u521D\u662F\u6D4F\u89C8\u5668\uFF0C\u540E\u6765\u662F Node.js\uFF09\u63D0\u4F9B\u4E86\u4E8B\u4EF6\u9A71\u52A8\u548C\u5F02\u6B65 I/O \u673A\u5236\u3002\u6D4F\u89C8\u5668\u672C\u8EAB\u662F\u591A\u7EBF\u7A0B\u7684\uFF08\u6E32\u67D3\u5F15\u64CE\u3001JavaScript \u5F15\u64CE\u3001\u7F51\u7EDC\u8BF7\u6C42\u7EBF\u7A0B\u3001\u5B9A\u65F6\u5668\u7EBF\u7A0B\u3001\u4E8B\u4EF6\u89E6\u53D1\u7EBF\u7A0B\u7B49\uFF09\uFF0C\u4F46 JavaScript \u5F15\u64CE\uFF08\u5982 V8\uFF09\u6267\u884C\u7528\u6237\u4EE3\u7801\u7684\u90E8\u5206\u53EA\u6709\u4E00\u4E2A\u4E3B\u7EBF\u7A0B\u3002
+- \u6D4F\u89C8\u5668\u73AF\u5883\u7684\u4E8B\u4EF6\uFF08\u7528\u6237\u70B9\u51FB\u3001\u7F51\u7EDC\u8BF7\u6C42\u5B8C\u6210\u3001\u5B9A\u65F6\u5668\u89E6\u53D1\u7B49\uFF09\u88AB\u653E\u5165\u4E00\u4E2A\u4E8B\u4EF6\u961F\u5217\u3002JavaScript \u5F15\u64CE\u7684\u4E3B\u7EBF\u7A0B\u901A\u8FC7\u4E00\u4E2A\u79F0\u4E3A\u4E8B\u4EF6\u5FAA\u73AF\u7684\u673A\u5236\uFF0C\u4E0D\u65AD\u5730\u4ECE\u961F\u5217\u4E2D\u53D6\u51FA\u4E8B\u4EF6\u5E76\u6267\u884C\u5BF9\u5E94\u7684\u56DE\u8C03\u51FD\u6570\u3002
+
+**\u601D\u8003 2\uFF1A\u53EF\u4EE5\u5B9E\u73B0\u591A\u7EBF\u7A0B\u5417\uFF1F**
+
+- Web Workers \u5141\u8BB8\u5728\u540E\u53F0\u7EBF\u7A0B\u4E2D\u8FD0\u884C JavaScript \u811A\u672C\uFF0C\u4E0E\u4E3B\u7EBF\u7A0B\u9694\u79BB\u3002
+- Worker \u4E0D\u80FD\u76F4\u63A5\u64CD\u4F5C DOM \u6216\u8BBF\u95EE\u4E3B\u7EBF\u7A0B\u7684\u53D8\u91CF\u3002
+- \u4E3B\u7EBF\u7A0B\u4E0E Worker \u4E4B\u95F4\u901A\u8FC7\u6D88\u606F\u4F20\u9012 (postMessage) \u8FDB\u884C\u901A\u4FE1\u3002
+- \u672C\u8D28\u4E0A\u662F\u5728\u4E3B\u7EBF\u7A0B\u4E4B\u5916\u5F00\u8F9F\u4E86\u989D\u5916\u7684\u7EBF\u7A0B\uFF0C\u4F46\u4E3B\u7EBF\u7A0B\u672C\u8EAB\u7684\u5355\u7EBF\u7A0B\u7279\u6027\u6CA1\u6709\u6539\u53D8\u3002
+
+### \u4F18\u70B9
+
+\u5B9E\u73B0\u4E86\u9AD8\u6548\u7684\u5F02\u6B65\u975E\u963B\u585E\u7F16\u7A0B\u3002\u5F53\u9047\u5230\u8017\u65F6\u64CD\u4F5C\uFF08\u5982\u7F51\u7EDC\u8BF7\u6C42\u3001\u6587\u4EF6\u8BFB\u5199\u3001\u5B9A\u65F6\u5668\uFF09\u65F6\uFF0CJavaScript \u5F15\u64CE\u4E0D\u4F1A\u963B\u585E\u4E3B\u7EBF\u7A0B\u7B49\u5F85\u7ED3\u679C\uFF0C\u800C\u662F\u5C06\u8FD9\u4E9B\u64CD\u4F5C\u59D4\u6258\u7ED9\u6D4F\u89C8\u5668\uFF08\u6216 Node.js\uFF09\u63D0\u4F9B\u7684\u5E95\u5C42 API\uFF08\u901A\u5E38\u662F\u591A\u7EBF\u7A0B\u5B9E\u73B0\u7684\uFF09\u3002\u64CD\u4F5C\u5B8C\u6210\u540E\uFF0C\u5BF9\u5E94\u7684\u56DE\u8C03\u51FD\u6570\u88AB\u653E\u5165\u4E8B\u4EF6\u961F\u5217\u3002\u4E3B\u7EBF\u7A0B\u5728\u5B8C\u6210\u5F53\u524D\u6267\u884C\u6808\u7684\u4EFB\u52A1\u540E\uFF0C\u4F1A\u53BB\u4E8B\u4EF6\u961F\u5217\u4E2D\u53D6\u51FA\u4E0B\u4E00\u4E2A\u56DE\u8C03\u6267\u884C\u3002
+
+### \u5B8F\u4EFB\u52A1\u4E0E\u5FAE\u4EFB\u52A1
+
+\u5B8F\u4EFB\u52A1(Macrotask/Task)\uFF1A\u7531\u6D4F\u89C8\u5668\u6216 Node.js \u73AF\u5883\u63D0\u4F9B\u7684\u5F02\u6B65\u4EFB\u52A1\uFF0C\u4F1A\u88AB\u653E\u5165\u4EFB\u52A1\u961F\u5217(Task Queue)\u4E2D\u7B49\u5F85\u6267\u884C\u3002
+
+1. setTimeout
+2. setInterval
+3. setImmediate (Node.js \u7279\u6709, setImmediate \u4E0E setTimeout(fn, 0)\u7684\u6267\u884C\u987A\u5E8F\u4E0E\u5176\u4ED6\u56E0\u7D20\u76F8\u5173)
+4. requestAnimationFrame (\u6D4F\u89C8\u5668\u7279\u6709)
+5. I/O \u64CD\u4F5C (\u6587\u4EF6\u8BFB\u5199\u3001\u7F51\u7EDC\u8BF7\u6C42\u7B49)
+6. UI \u6E32\u67D3 (\u6D4F\u89C8\u5668)
+7. \u4E8B\u4EF6\u56DE\u8C03 (\u5982 click\u3001scroll \u7B49 DOM \u4E8B\u4EF6)
+8. MessageChannel \u6D88\u606F\u901A\u9053
+
+\u5FAE\u4EFB\u52A1(Microtask)\uFF1A\u4F18\u5148\u7EA7\u9AD8\u4E8E\u5B8F\u4EFB\u52A1\u7684**\u5F02\u6B65\u4EFB\u52A1**\uFF0C\u4F1A\u88AB\u653E\u5165\u5FAE\u4EFB\u52A1\u961F\u5217(Microtask Queue)\u4E2D\u3002
+
+1. Promise.then() / Promise.catch() / Promise.finally() / await func()
+2. MutationObserver (\u6D4F\u89C8\u5668 DOM \u53D8\u5316\u89C2\u5BDF)
+3. process.nextTick (Node.js \u7279\u6709\uFF0C\u4F18\u5148\u7EA7\u9AD8\u4E8E\u5176\u4ED6\u5FAE\u4EFB\u52A1)
+4. queueMicrotask (\u73B0\u4EE3\u6D4F\u89C8\u5668\u63D0\u4F9B\u7684 API)
+5. Object.observe (\u5DF2\u5E9F\u5F03)
+
+### \u6267\u884C\u987A\u5E8F
+
+1. \u6267\u884C\u6808\u987A\u5E8F
+   \u6267\u884C\u540C\u6B65\u4EE3\u7801 \u2192 \u6E05\u7A7A\u5FAE\u4EFB\u52A1\u961F\u5217 \u2192 \u6267\u884C\u4E00\u4E2A\u5B8F\u4EFB\u52A1 \u2192 \u6E05\u7A7A\u5FAE\u4EFB\u52A1\u961F\u5217 \u2192 \u5FAA\u73AF...
+2. \u4F18\u5148\u7EA7\uFF1A
+
+- \u540C\u6B65\u4EE3\u7801 > \u5FAE\u4EFB\u52A1 > \u5B8F\u4EFB\u52A1\uFF08\u5148\u8FDB\u5148\u6267\u884C\uFF09
+- Node.js \u4E2D\uFF1Aprocess.nextTick > \u5176\u4ED6\u5FAE\u4EFB\u52A1
+
+### \u7EC3\u4E60 1
+
+\`\`\`js
+console.log('1');
+
+setTimeout(() => {
+  console.log('2');
+  Promise.resolve().then(() => {
+    console.log('3');
+  });
+}, 0);
+
+Promise.resolve().then(() => {
+  console.log('4');
+  setTimeout(() => {
+    console.log('5');
+  }, 0);
+});
+
+console.log('6');
+\`\`\`
+
+1. \u6267\u884C\u540C\u6B65\u4EE3\u7801 \u2192 1
+2. setTimeout 2\uFF08\u6574\u4F53\uFF09\u653E\u5165\u4EFB\u52A1\u961F\u5217**\u7B49\u5F85** \u2192 Promise.then 4\uFF08\u6574\u4F53\uFF09\u653E\u5165\u5FAE\u4EFB\u52A1\u961F\u5217**\u7B49\u5F85**
+3. \u6267\u884C\u540C\u6B65\u4EE3\u7801 \u2192 6
+4. \u6267\u884C\u5FAE\u4EFB\u52A1\u961F\u5217 Promise.then \u2192 4
+5. setTimeout 5\uFF08\u6574\u4F53\uFF09\u653E\u5165\u4EFB\u52A1\u961F\u5217**\u7B49\u5F85**
+6. \u6267\u884C\u5B8F\u4EFB\u52A1\u961F\u5217 setTimeout \u2192 2
+7. Promise.then 3\uFF08\u6574\u4F53\uFF09\u653E\u5165\u5FAE\u4EFB\u52A1\u961F\u5217**\u7B49\u5F85**
+8. \u6267\u884C\u5FAE\u4EFB\u52A1\u961F\u5217 Promise.then \u2192 3
+9. \u6267\u884C\u5B8F\u4EFB\u52A1\u961F\u5217 setTimeout \u2192 5
+
+\u6700\u7EC8\u8F93\u51FA\u987A\u5E8F\uFF1A1, 6, 4, 2, 3, 5
+
+### \u7EC3\u4E60 2
+
+\`\`\`js
+async function async1() {
+  console.log('async1 start');
+  await async2();
+  console.log('async1 end');
+}
+
+async function async2() {
+  console.log('async2 do');
+}
+
+console.log('script start');
+
+setTimeout(() => {
+  console.log('setTimeout');
+}, 0);
+
+async1();
+
+new Promise(resolve => {
+  console.log('promise1');
+  resolve();
+}).then(() => {
+  console.log('promise2');
+});
+
+console.log('script end');
+\`\`\`
+
+1. \u6267\u884C\u540C\u6B65\u4EE3\u7801 \u2192 script start
+2. setTimeout \u653E\u5165\u4EFB\u52A1\u961F\u5217**\u7B49\u5F85**
+3. \u6267\u884C\u540C\u6B65\u4EE3\u7801 \u2192 async1 start \u2192 async2 do
+4. await async2()**\u4E4B\u540E\u7684**\uFF08\u6574\u4F53\uFF09\u653E\u5165\u5FAE\u4EFB\u52A1\u961F\u5217**\u7B49\u5F85**
+5. \u6267\u884C\u540C\u6B65\u4EE3\u7801 \u2192 promise1
+6. Promise.then\uFF08\u6574\u4F53\uFF09\u653E\u5165\u5FAE\u4EFB\u52A1\u961F\u5217**\u7B49\u5F85**
+7. \u884C\u540C\u6B65\u4EE3\u7801 \u2192 script end
+8. \u6267\u884C\u5FAE\u4EFB\u52A1\u961F\u5217 -> async1 end -> promise2
+9. \u6267\u884C\u5B8F\u4EFB\u52A1\u961F\u5217 -> setTimeout
+
+\u6700\u7EC8\u8F93\u51FA\u987A\u5E8F\uFF1A
+
+\`\`\`
+script start
+async1 start
+async2 do
+promise1
+script end
+async1 end
+promise2
+setTimeout
+\`\`\`
+
+### \u7EC3\u4E60 3
+
+\`\`\`js
+console.log(1);
+
+setTimeout(() => {
+  console.log(2);
+  Promise.resolve().then(() => {
+    console.log(3);
+  });
+});
+
+new Promise((resolve, reject) => {
+  console.log(4);
+  resolve(5);
+}).then(data => {
+  console.log(data);
+});
+
+setTimeout(() => {
+  console.log(6);
+});
+
+console.log(7);
+\`\`\`
+
+\u6700\u7EC8\u8F93\u51FA\u987A\u5E8F\uFF1A1, 4, 7, 5, 2, 3, 6
+
+### \u7EC3\u4E60 4\uFF08\u5D4C\u5957\uFF09
+
+\`\`\`js
+console.log(1);
+
+setTimeout(() => {
+  console.log(2);
+  Promise.resolve().then(() => {
+    console.log(3);
+  });
+});
+
+new Promise((resolve, reject) => {
+  console.log(4);
+  resolve(5);
+}).then(data => {
+  console.log(data);
+
+  Promise.resolve()
+    .then(() => {
+      console.log(6);
+    })
+    .then(() => {
+      console.log(7);
+
+      setTimeout(() => {
+        console.log(8);
+      }, 0);
+    });
+});
+
+setTimeout(() => {
+  console.log(9);
+});
+
+console.log(10);
+\`\`\`
+
+\u6700\u7EC8\u8F93\u51FA\u987A\u5E8F\uFF1A1, 4, 10, 5, 6, 7, 2, 3, 9, 8
+
+### \u7EC3\u4E60 5\uFF08\u4E0D\u540C node \u7248\u672C\u6267\u884C\u7ED3\u679C\u4E0D\u540C\uFF09
+
+\`\`\`js
+console.log('1');
+
+setTimeout(function() {
+  console.log('2');
+  process.nextTick(function() {
+    console.log('3');
+  });
+  new Promise(function(resolve) {
+    console.log('4');
+    resolve();
+  }).then(function() {
+    console.log('5');
+  });
+});
+
+new Promise(function(resolve) {
+  console.log('7');
+  resolve();
+}).then(function() {
+  console.log('8');
+});
+
+process.nextTick(function() {
+  console.log('6');
+});
+
+setTimeout(function() {
+  console.log('9');
+  process.nextTick(function() {
+    console.log('10');
+  });
+  new Promise(function(resolve) {
+    console.log('11');
+    resolve();
+  }).then(function() {
+    console.log('12');
+  });
+});
+\`\`\`
+
+node v12.18.3 \u6700\u7EC8\u8F93\u51FA\u987A\u5E8F\uFF1A1, 7, 6, 8, 2, 4, 3, 5, 9, 11, 10, 12
+
+node v10.24.1 \u6700\u7EC8\u8F93\u51FA\u987A\u5E8F\uFF1A1, 7, 6, 8, 2, 4, 9, 11, 3, 10, 5, 12
+
+### \u7EC3\u4E60 6\uFF08\u7B49\u5F85\u65F6\u95F4\u5F71\u54CD\u5B8F\u4EFB\u52A1\u987A\u5E8F\uFF09
+
+\`\`\`js
+setImmediate(function() {
+  console.log('1');
+});
+
+setTimeout(function() {
+  console.log('2');
+});
+
+console.log('3');
+\`\`\`
+
+\u6700\u7EC8\u8F93\u51FA\u987A\u5E8F\uFF1A3, 2, 1
+
+\u7EDD\u5927\u90E8\u5206\u60C5\u51B5\u4E0B setTimeout \u4F1A\u4F18\u5148\u4E8E setImmediate \u6267\u884C\uFF0C\u4F46\u662F\u5F53 setTimeout \u7684\u6700\u5C0F\u9608\u503C\uFF08ms \u5355\u4F4D\uFF09\u6539\u53D8\u65F6\uFF0C\u6267\u884C\u987A\u5E8F\u53EF\u80FD\u4F1A\u53D1\u751F\u6539\u53D8\uFF0C\u5982\uFF1A
+
+\`\`\`js
+setImmediate(function() {
+  console.log('1');
+});
+
+setTimeout(function() {
+  console.log('2');
+}, 5);
+
+console.log('3');
+\`\`\`
+
+\u6700\u7EC8\u8F93\u51FA\u987A\u5E8F\uFF1A3, 1, 2
+
+### \u7EC3\u4E60 7\uFF08I/O \u64CD\u4F5C\uFF09
+
+\u5728 I/O \u64CD\u4F5C\u91CC\uFF0CsetImmediate \u603B\u662F\u88AB\u4F18\u5148\u4E8E setTimeout \u8C03\u7528\uFF1A
+
+\`\`\`js
+const fs = require('fs');
+
+fs.readFile(__filename, () => {
+  setTimeout(() => {
+    console.log('timeout');
+  }, 0);
+  setImmediate(() => {
+    console.log('immediate');
+  });
+});
+\`\`\`
+
+\u6700\u7EC8\u8F93\u51FA\u987A\u5E8F\uFF1Aimmediate, timeout
+`}}]);
