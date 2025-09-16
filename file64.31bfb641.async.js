@@ -256,7 +256,7 @@ const ComB = () => {
 
 ### \u5168\u5C40\u72B6\u6001\u7BA1\u7406
 
-useReducer\u3001redux\u3001mobx\u3001hox\u3001recoil\uFF08\u5355\u72EC\u6574\u7406\u4E86[\u72B6\u6001\u7BA1\u7406.md](https://chenqiuling.github.io/frontend-notes-viewer/#/doc/66)\uFF09
+useReducer\u3001redux\u3001mobx\u3001hox\u3001recoil \u7B49\u3002
 
 ## Hooks \u539F\u7406
 
